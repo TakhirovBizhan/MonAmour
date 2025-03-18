@@ -14,21 +14,26 @@ return new class extends Migration
     public function up()
     {
         Schema::create('paintings', function (Blueprint $table) {
-            $table->id()->primary();
-
+            $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->uuid('artist_id');
-            $table->uuid('gallery_id')->nullable();
-            $table->uuid('category_id')->nullable();
+
+            // Внешние ключи
+            $table->unsignedBigInteger('artist_id');
+            $table->unsignedBigInteger('gallery_id')->nullable();
+
             $table->string('technique')->nullable();
             $table->string('dimensions')->nullable();
-            $table->decimal('price', 12)->nullable();
+            $table->decimal('price', 12, 2)->nullable();
             $table->string('image_url')->nullable();
             $table->string('city_of_creation')->nullable();
-
             $table->enum('availability', ['в наличии', 'продано'])->default('в наличии');
+
             $table->timestamps();
+
+            // Внешние ключи
+            $table->foreign('artist_id')->references('id')->on('artists')->onDelete('cascade');
+            $table->foreign('gallery_id')->references('id')->on('galleries')->onDelete('set null');
         });
     }
 
