@@ -1,10 +1,10 @@
-# Используем официальный Node образ (на основе Alpine для легкости)
-FROM node:16-alpine
+# Используем более новую версию Node
+FROM node:18-alpine
 
 # Устанавливаем рабочую директорию
-WORKDIR /app
+WORKDIR /monamour/frontend
 
-# Копируем package.json (и package-lock.json, если есть) для установки зависимостей
+# Копируем файлы package.json и package-lock.json (если есть)
 COPY package.json package-lock.json* ./
 
 # Устанавливаем зависимости
@@ -13,8 +13,8 @@ RUN npm install
 # Копируем остальные файлы проекта
 COPY . .
 
-# Открываем порт приложения (по умолчанию React запускается на 3000)
+# Открываем порт (по умолчанию Vite использует 3000)
 EXPOSE 3000
 
-# Запуск React-приложения
+# Запуск приложения
 CMD ["npm", "run", "dev"]

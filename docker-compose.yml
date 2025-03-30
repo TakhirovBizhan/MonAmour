@@ -17,9 +17,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: bash -c "/backend/wait_for_postgres.sh && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "./wait_for_postgres.sh && python monamour/manage.py runserver 0.0.0.0:8000"
     volumes:
-      - ./backend:/monamour
+      - ./backend:/monamour/backend
     ports:
       - "8000:8000"
     environment:

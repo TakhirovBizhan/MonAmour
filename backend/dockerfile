@@ -1,8 +1,9 @@
-# Используем официальный образ Python
+# backend/Dockerfile
+
 FROM python:3.11-slim
 
-# Устанавливаем рабочую директорию
-WORKDIR /backend
+# Устанавливаем рабочую директорию в папку backend
+WORKDIR /monamour/backend
 
 # Устанавливаем зависимости системы
 RUN apt-get update && apt-get install -y \
@@ -12,10 +13,10 @@ RUN apt-get update && apt-get install -y \
     apt-get clean
 
 # Копируем скрипт ожидания
-COPY wait_for_postgres.sh /backend/wait_for_postgres.sh
+COPY wait_for_postgres.sh /monamour/backend/wait_for_postgres.sh
 
 # Делаем скрипт исполнимым
-RUN chmod +x /backend/wait_for_postgres.sh
+RUN chmod +x /monamour/backend/wait_for_postgres.sh
 
 # Копируем файл зависимостей
 COPY requirements.txt .
@@ -23,11 +24,12 @@ COPY requirements.txt .
 # Устанавливаем зависимости проекта
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем весь проект
+# Копируем все файлы проекта (будет скопирована папка monamour с manage.py)
 COPY . .
 
 # Экспортируем порт приложения
 EXPOSE 8000
 
-# Запуск сервера разработки Django
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Запуск сервера Django.
+# Обратите внимание, что manage.py лежит в поддиректории monamour
+CMD ["python", "monamour/manage.py", "runserver", "0.0.0.0:8000"]
