@@ -1,2 +1,3 @@
 # MonAmour
-Laravel + react ts project. Оnline art store.
+
+django rest framework + react ts project. Оnline art store.
