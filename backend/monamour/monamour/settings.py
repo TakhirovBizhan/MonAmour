@@ -31,12 +31,18 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # стандартные Django-приложения
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'accounts',
+    'store',
+    'orders',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -75,8 +81,12 @@ WSGI_APPLICATION = 'monamour.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mon_amour_db',         
+        'USER': 'postgres',
+        'PASSWORD': '1242sz13',         
+        'HOST': 'db', 
+        'PORT': '5432',
     }
 }
 
@@ -110,6 +120,9 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
 
 
 # Static files (CSS, JavaScript, Images)
