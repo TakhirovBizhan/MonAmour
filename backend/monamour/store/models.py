@@ -3,33 +3,44 @@ from django.db import models
 
 class Artist(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, verbose_name='Имя художника')
     image = models.ImageField(upload_to='Artists/', blank=True, verbose_name='Изображение')
-    biography = models.TextField()
-    portfolio = models.TextField(blank=True)
-    social_links = models.TextField(blank=True)
-
+    biography = models.TextField(verbose_name='Биография')
+    
     def __str__(self):
         return f"Artist {self.id}"
+    
+    class Meta:
+        verbose_name = 'Автор'
+        verbose_name_plural = 'Авторы'
 
 class Gallery(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    gallery_photo_url = models.URLField(blank=True)
+    name = models.CharField(max_length=255, verbose_name='Название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    gallery_image = models.ImageField(upload_to='gallery/', blank=True, verbose_name='Изображение')
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = 'Галлерея'
+        verbose_name_plural = 'Галлереи'
 
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=255, verbose_name='Название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано в')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлено в')
     
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        
 
 class Painting(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

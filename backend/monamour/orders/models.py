@@ -11,6 +11,10 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"Cart of {self.user}"
+    
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзина'
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -27,6 +31,10 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id} by {self.user}"
+    
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказ'
 
 class OrderItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -36,3 +44,7 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"OrderItem {self.id} for Order {self.order.id}"
+    
+    class Meta:
+        verbose_name = 'Элемент заказа'
+        verbose_name_plural = 'Элемент заказов'
