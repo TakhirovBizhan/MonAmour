@@ -10,7 +10,7 @@ class Artist(models.Model):
     biography = models.TextField(verbose_name='Биография')
     
     def __str__(self):
-        return f"Artist {self.id}"
+        return self.name
     
     class Meta:
         verbose_name = 'Автор'

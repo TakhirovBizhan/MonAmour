@@ -10,7 +10,7 @@ class Cart(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Cart of {self.user}"
+        return f"Корзина {self.user}"
     
     class Meta:
         verbose_name = 'Корзина'
@@ -28,9 +28,16 @@ class Order(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='processing')
     delivery_address = models.TextField()
+      # новое поле M2M через OrderItem:
+    paintings = models.ManyToManyField(
+        Painting,
+        through='OrderItem',
+        related_name='orders',
+        verbose_name='Картины в заказе'
+    )
 
     def __str__(self):
-        return f"Order {self.id} by {self.user}"
+        return f"Заказ {self.id}, {self.user}"
     
     class Meta:
         verbose_name = 'Заказ'
@@ -44,7 +51,7 @@ class OrderItem(models.Model):
     purchased_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата/время покупки')
 
     def __str__(self):
-        return f"OrderItem {self.id} — куплено {self.purchased_at}"
+        return f"{self.painting} — куплено {self.purchased_at}"
     
     class Meta:
         verbose_name = 'Элемент заказа'

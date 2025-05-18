@@ -41,7 +41,7 @@ class PaintingImageInline(admin.TabularInline):
 @admin.register(Painting)
 class PaintingAdmin(admin.ModelAdmin):
     list_display = ('title', 'artist', 'gallery', 'status', 'added_at', 'price')
-    list_filter = ('gallery', 'status', 'added_at')
+    list_filter = ('artist', 'gallery', 'status', 'added_at')
     date_hierarchy = 'added_at'
     search_fields = ('title', 'description')
     raw_id_fields = ('artist', 'gallery')
