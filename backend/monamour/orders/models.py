@@ -41,9 +41,10 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     painting = models.ForeignKey(Painting, on_delete=models.CASCADE)
     price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
+    purchased_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата/время покупки')
 
     def __str__(self):
-        return f"OrderItem {self.id} for Order {self.order.id}"
+        return f"OrderItem {self.id} — куплено {self.purchased_at}"
     
     class Meta:
         verbose_name = 'Элемент заказа'

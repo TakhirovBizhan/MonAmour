@@ -1,3 +1,5 @@
+from django.utils import timezone
+from decimal import Decimal
 import uuid
 from django.db import models
 
@@ -16,7 +18,7 @@ class Artist(models.Model):
 
 class Gallery(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255, verbose_name='Название')
+    name = models.CharField(max_length=255, verbose_name='Название галереи')
     description = models.TextField(blank=True, verbose_name='Описание')
     gallery_image = models.ImageField(upload_to='gallery/', blank=True, verbose_name='Изображение')
 
@@ -61,6 +63,33 @@ class Painting(models.Model):
     class Meta:
         verbose_name = 'Картина'
         verbose_name_plural = 'Картины'
+        
+    def days_in_stock(self) -> int:
+        """
+        Возвращает число полных дней с момента добавления на склад до сейчас.
+        """
+        return (timezone.now() - self.added_at).days
+
+    def discounted_price(self) -> Decimal:
+        """
+        Если картина лежит > 30 дней — 5% скидка,
+                                > 60 дней — 10% скидка,
+                                иначе без скидки.
+        """
+        days = self.days_in_stock()
+        if days > 60:
+            factor = Decimal('0.90')  # 10% off
+        elif days > 30:
+            factor = Decimal('0.95')  # 5% off
+        else:
+            factor = Decimal('1.00')
+        return (self.price * factor).quantize(Decimal('0.01'))
+
+class Promotion(models.Model):
+    painting = models.ForeignKey(Painting, on_delete=models.CASCADE, related_name='promotions')
+    discount_percent = models.PositiveSmallIntegerField(verbose_name='Скидка, %')
+    start = models.DateTimeField(default=timezone.now, verbose_name='Начало акции')
+    end = models.DateTimeField(verbose_name='Окончание акции')
 
 
 class PaintingImage(models.Model):
