@@ -15,6 +15,7 @@ class Artist(models.Model):
     class Meta:
         verbose_name = 'Автор'
         verbose_name_plural = 'Авторы'
+        ordering = ['name']
 
 class Gallery(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -28,6 +29,7 @@ class Gallery(models.Model):
     class Meta:
         verbose_name = 'Галлерея'
         verbose_name_plural = 'Галлереи'
+        ordering = ['name']
 
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -42,6 +44,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        ordering = ['created_at', 'name']
         
 
 class Painting(models.Model):
@@ -63,6 +66,7 @@ class Painting(models.Model):
     class Meta:
         verbose_name = 'Картина'
         verbose_name_plural = 'Картины'
+        ordering = ['added_at', 'title']
         
     def days_in_stock(self) -> int:
         """

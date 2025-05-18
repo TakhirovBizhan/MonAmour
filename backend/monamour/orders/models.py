@@ -15,6 +15,7 @@ class Cart(models.Model):
     class Meta:
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзина'
+        ordering = ['-added_at', 'user']
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -42,6 +43,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказ'
+        ordering = ['-order_date', 'user']
 
 class OrderItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
