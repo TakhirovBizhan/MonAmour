@@ -5,12 +5,12 @@ from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage
 class ArtistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artist
-        fields = ['id', 'name', 'image', 'biography', 'portfolio']
+        fields = ['id', 'name', 'image', 'biography']
 
 class GallerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Gallery
-        fields = ['id', 'name', 'description', 'gallery_photo_url']
+        fields = ['id', 'name', 'description', 'gallery_image']
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

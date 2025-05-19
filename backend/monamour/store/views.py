@@ -1,6 +1,9 @@
 # store/views.py
+from django.db.models import Count
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, filters
+from django.utils import timezone
+from django.db import models
 from .models import Artist, Gallery, Category, Painting, Banner
 from .serializers import (
     ArtistSerializer,
@@ -29,7 +32,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
     queryset = Artist.objects.all()
     serializer_class = ArtistSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ['name']  # базовая фильтрация по имени
+    filterset_fields = ['name']
 
 class GalleryViewSet(viewsets.ModelViewSet):
     queryset = Gallery.objects.all()
@@ -38,16 +41,56 @@ class GalleryViewSet(viewsets.ModelViewSet):
     filterset_fields = ['name']
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
 
+    def get_queryset(self):
+        # 1) Количество картин в каждой категории
+        # 2) Средняя цена картин в категории
+        from django.db.models import Count, Avg
+        return Category.objects.annotate(
+            num_paintings=Count('painting'),
+            avg_price=Avg('painting__price')
+        )
+
 class PaintingViewSet(viewsets.ModelViewSet):
-    queryset = Painting.objects.select_related('artist', 'gallery').prefetch_related('images')
     serializer_class = PaintingSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PaintingFilter
+
+    def get_queryset(self):
+        # пример использования собственного менеджера
+        qs = Painting.objects.in_stock().expensive(50000)
+        qs = qs.select_related('artist', 'gallery').prefetch_related('images')
+
+        # lookup-выражения
+        params = self.request.query_params
+        if params.get('min_price'):
+            qs = qs.filter(price__gt=params['min_price'])
+        if params.get('artist'):
+            qs = qs.filter(artist__name__icontains=params['artist'])
+        if params.get('category'):
+            qs = qs.filter(category__name__iexact=params['category'])
+
+        # сортировка
+        sort = params.get('sort')
+        if sort == 'price_desc':
+            qs = qs.order_by('-price')
+        elif sort == 'price_asc':
+            qs = qs.order_by('price')
+        else:
+            qs = qs.order_by('-added_at')
+
+        # 3) Количество активных акций (аннотация с фильтром)
+        now = timezone.now()
+        qs = qs.annotate(
+            active_promotions_count= Count(
+                'promotions',
+                filter=models.Q(promotions__start__lte=now, promotions__end__gte=now)
+            )
+        )
+        return qs
 
 class BannerViewSet(viewsets.ModelViewSet):
     queryset = Banner.objects.all()

@@ -21,7 +21,7 @@ from django.contrib import admin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # другие url-адреса
+    path('api/', include('monamour.api_urls')),  
 ]
 
 if settings.DEBUG:

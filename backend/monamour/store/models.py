@@ -3,6 +3,22 @@ from decimal import Decimal
 import uuid
 from django.db import models
 
+
+class PaintingQuerySet(models.QuerySet):
+    def expensive(self, threshold: Decimal):
+        """Картины, цена которых больше порога."""
+        return self.filter(price__gt=threshold)
+
+    def in_stock(self):
+        """Только доступные картины."""
+        return self.filter(status='available')
+
+    def with_active_promotions(self):
+        """Картины, у которых есть текущие акции."""
+        now = timezone.now()
+        return self.filter(promotions__start__lte=now, promotions__end__gte=now).distinct()
+    
+
 class Artist(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, verbose_name='Имя художника')
@@ -48,6 +64,9 @@ class Category(models.Model):
         
 
 class Painting(models.Model):
+        # подключаем собственный менеджер вместо objects=models.Manager()
+    objects = PaintingQuerySet.as_manager()
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255, verbose_name='Название')
     description = models.TextField(blank=True, verbose_name='Описание')
