@@ -1,0 +1,65 @@
+@use "../../styles/variables" as *;
+
+.card {
+  width: 100%;
+  width: 360px;
+  height: 618px;
+  background-color: $bg-primary;
+  transition: box-shadow 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  &:hover {
+    box-shadow: $shadow;
+  }
+
+  &__header {
+    position: relative;
+    background-color: $light-grey;
+
+    &::after {
+      content: "";
+      display: block;
+      padding-top: 100%;
+    }
+  }
+
+  &__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    padding: $space_xs;
+
+    &__caption {
+      margin-bottom: $space_xxs;
+    }
+
+    &__subtitle {
+      margin-top: $space_xxs;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    margin-top: $space_l;
+    margin-bottom: 24px;
+  }
+
+  &__action {
+    padding-left: $space_xxs;
+    margin-left: auto;
+  }
+}

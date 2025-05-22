@@ -1,0 +1,33 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/styles.scss" as *;
+
+.root {
+  margin-bottom: 100px;
+
+  &__text_block {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: $space_xl;
+    align-items: center;
+
+    p {
+      max-width: 653px;
+      text-align: center;
+    }
+  }
+
+  &__search_block {
+    display: flex;
+    flex-direction: column;
+    gap: $space_xl;
+  }
+
+  &__pagination_block {
+    margin-top: $space_xxxl;
+  }
+}
+
+.wrapper {
+  @include wrapper
+}

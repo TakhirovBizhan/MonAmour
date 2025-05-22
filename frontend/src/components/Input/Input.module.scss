@@ -1,0 +1,57 @@
+@use "../../styles/variables" as *;
+
+.input {
+  --text-color: #{$primary-color};
+  --bg-color: #{$bg-primary};
+  --border-color: transparent;
+
+  display: flex;
+  align-items: center;
+  padding: $space_s $space_xs;
+  height: 52px;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease,
+    background-color 0.3s ease;
+
+  &--disabled {
+    --text-color: #{$primary-color};
+    pointer-events: none;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  &__field {
+    display: block;
+    flex-grow: 1;
+    height: 100%;
+    padding: 0;
+    border: none;
+    color: var(--text-color);
+    font-family: "Roboto";
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 400;
+    background: none;
+    appearance: none;
+    outline: none;
+    transition: color 0.3s ease;
+
+    &::placeholder {
+      color: $color-secondary;
+      opacity: 1;
+    }
+  }
+}
+
+.input:focus-within {
+  --border-color: #{$brand-color};
+}
+
+.input__after {
+  display: flex;
+  flex-shrink: 0;
+  margin-left: $space_xxs;
+}

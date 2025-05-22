@@ -1,0 +1,14 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/styles.scss" as *;
+
+
+.wrapper {
+    @include wrapper();
+    display: flex;
+    flex-direction: column;
+    margin-top: 75px;
+}
+
+.price {
+    margin-bottom: 20px;
+}

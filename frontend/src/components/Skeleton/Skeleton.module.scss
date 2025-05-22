@@ -1,0 +1,29 @@
+@use "../../styles/variables" as *;
+
+.skeleton {
+  position: relative;
+  width: 100%;
+  background-color: $light-grey;
+  overflow: hidden;
+  height: 100%;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, $brand-hover, transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}

@@ -1,0 +1,70 @@
+@use "../../styles/variables" as *;
+.text {
+  &_view {
+    &_button {
+      font-size: 18px;
+      line-height: 18px;
+    }
+
+    &_title {
+      font-size: 44px;
+      line-height: 48px;
+      font-weight: 700;
+    }
+    &_min-title {
+      font-size: 32px;
+      line-height: 48px;
+      font-weight: 700;
+    }
+    &_p-20 {
+      font-size: 20px;
+      line-height: 24px;
+    }
+
+    &_p-18 {
+      font-size: 18px;
+      line-height: 22px;
+    }
+    &_p-16 {
+      font-size: 16px;
+      line-height: 20px;
+    }
+
+    &_p-14 {
+      font-size: 14px;
+      line-height: 18px;
+    }
+  }
+
+  &_weight {
+    &_normal {
+      font-weight: 400;
+    }
+    &_medium {
+      font-weight: 500;
+    }
+    &_bold {
+      font-weight: 700;
+    }
+  }
+
+  &_color {
+    &_primary {
+      color: $primary-color;
+    }
+    &_secondary {
+      color: $color-secondary;
+    }
+    &_accent {
+      color: $brand-color;
+    }
+  }
+
+  &_clamp {
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--lines-count);
+  }
+}

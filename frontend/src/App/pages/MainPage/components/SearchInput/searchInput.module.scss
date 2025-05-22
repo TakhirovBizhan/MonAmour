@@ -1,0 +1,12 @@
+@use "../../../../../styles/variables.scss" as *;
+
+.search_block {
+  margin-top: $space_xxxl;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &__input {
+    max-width: 1079px;
+  }
+}

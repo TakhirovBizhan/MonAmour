@@ -11,7 +11,11 @@ from .serializers import (
     CategorySerializer,
     PaintingSerializer,
     BannerSerializer,
+    UserSerializer
 )
+from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
 
 # Фильтрация для картин
 class PaintingFilter(FilterSet):
@@ -97,3 +101,29 @@ class BannerViewSet(viewsets.ModelViewSet):
     serializer_class = BannerSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['headline']
+
+
+User = get_user_model()
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    Позволяет:
+      - администратору: CRUD по любому пользователю
+      - аутентифицированному юзеру: получать и править свой профиль
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_permissions(self):
+        # авторизованные могут читать и править только себя
+        if self.action in ('retrieve', 'update', 'partial_update'):
+            return [IsAuthenticated()]
+        # на список, создание и удаление — только админ
+        return [IsAdminUser()]
+    
+    def get_queryset(self):
+        # если это обычный пользователь — пусть видит только себя
+        user = self.request.user
+        if not user.is_staff:
+            return User.objects.filter(pk=user.pk)
+        return super().get_queryset()

@@ -1,0 +1,38 @@
+@use "../../styles/variables" as *;
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader {
+  fill: $brand-color;
+  animation: spin 1s infinite linear;
+
+  &_block {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+  }
+
+  &-size {
+    &-l {
+      width: 60px;
+      height: 60px;
+    }
+
+    &-m {
+      width: 48px;
+      height: 48px;
+    }
+
+    &-s {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}

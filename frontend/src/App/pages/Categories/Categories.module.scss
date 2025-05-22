@@ -1,0 +1,30 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/styles.scss" as *;
+
+.wrapper {
+    @include wrapper;
+    display: flex;
+    justify-content: center;
+}
+
+main {
+    margin-top: 100px;
+}
+.category_card {
+    height: 534px;
+}
+.category_list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.action_btn {
+    transition: padding-left 0.3s;
+}
+
+.action_btn:hover {
+    transition: padding-left 0.3s;
+    padding-left: 150px;
+}

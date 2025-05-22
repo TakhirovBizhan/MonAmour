@@ -1,0 +1,87 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/styles.scss" as *;
+
+.fieldset {
+    background-color: $bg-secondary-grey;
+    box-shadow: $shadow;
+    margin-top: 100px;
+    padding: $space_xl;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 500px;
+    border-color: $brand-color;
+    border-radius: 15px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 8px;
+
+    button {
+        width: fit-content;
+    }
+
+    label {
+        color: $primary-color;
+        display: flex;
+        justify-content: space-between;
+        font-size: 19px;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    input {
+        border: 1px solid rgb(138, 135, 138);
+        border-radius: 7.5px;
+        width: 100%;
+        max-width: 350px;
+        padding: 3px;
+    }
+
+    input:focus {
+        background-color: rgb(179, 198, 236);
+        opacity: 0.9;
+        outline-style: none;
+    }
+
+    input:valid {
+        border-color: 1px solid green;
+        background-color: rgb(205, 243, 200);
+    }
+
+    input:invalid {
+        border-color: 1px solid red;
+        background-color: rgb(247, 195, 195);
+    }
+}
+
+.submit_btn {
+    width: fit-content;
+}
+
+
+.assign_link {
+    margin-top: 20px;
+    text-align: center;
+    color: $brand-color;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.eye_icon {
+    width: 23px;
+    position: absolute;
+    right: 100px;
+    bottom: 1px;
+    border-left: 1px solid grey;
+    padding-left: 1px;
+}
+
+.password_label {
+    position: relative;
+}

@@ -7,6 +7,7 @@ from store.views import (
     CategoryViewSet,
     PaintingViewSet,
     BannerViewSet,
+    UserViewSet
 )
 from orders.views import CartViewSet, OrderViewSet, OrderItemViewSet
 
@@ -20,5 +21,6 @@ router.register(r'banners', BannerViewSet, basename='banner')
 router.register(r'carts', CartViewSet, basename='cart')
 router.register(r'orders', OrderViewSet, basename='order')
 router.register(r'order-items', OrderItemViewSet, basename='orderitem')
+router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = router.urls

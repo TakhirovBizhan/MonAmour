@@ -1,6 +1,7 @@
 # store/serializers.py
 from rest_framework import serializers
 from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage
+from django.contrib.auth import get_user_model
 
 class ArtistSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,3 +47,12 @@ class BannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
         fields = ['id', 'headline', 'subheadline', 'link', 'image_url']
+        
+
+User = get_user_model()
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        read_only_fields = ['id']

@@ -1,0 +1,39 @@
+@use "../../styles/variables" as *;
+
+.button {
+  background-color: $brand-color;
+  display: inline-flex;
+  align-items: center;
+  padding: $space_s $space_l;
+  border: none;
+  color: $bg-primary;
+  height: 52px;
+  white-space: nowrap;
+
+  &__loader {
+    fill: $bg-primary;
+  }
+
+  &:hover {
+    background-color: $brand-hover;
+  }
+
+  &:disabled {
+    pointer-events: none;
+    cursor: default;
+  }
+
+  &--disabled {
+    background-color: $light-grey;
+  }
+
+  &:active {
+    background-color: $color-accent-active;
+  }
+
+  .button__loader {
+    flex-shrink: 0;
+    margin-right: 8px;
+    color: currentColor;
+  }
+}

@@ -1,0 +1,37 @@
+@use "../../../../styles/variables.scss" as *;
+
+.product {
+  display: flex;
+  gap: $space_xxxl;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $space_xxxl;
+
+    &__text {
+      display: flex;
+      flex-direction: column;
+      gap: $space_xl;
+    }
+
+    &__purchase {
+      padding-top: $space_xxl;
+      display: flex;
+      flex-direction: column;
+      gap: $space_xxxl;
+
+      &__buttons {
+        display: flex;
+        gap: $space_xxxl;
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .product {
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}

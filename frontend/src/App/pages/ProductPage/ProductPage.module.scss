@@ -1,0 +1,57 @@
+@use "../../../styles/variables.scss" as *;
+
+.product {
+  display: flex;
+  gap: $space_xxxl;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $space_xxxl;
+
+    &__text {
+      display: flex;
+      flex-direction: column;
+      gap: $space_xl;
+    }
+
+    &__purchase {
+      padding-top: $space_xxl;
+      display: flex;
+      flex-direction: column;
+      gap: $space_xxxl;
+
+      &__buttons {
+        display: flex;
+        gap: $space_xxxl;
+      }
+    }
+  }
+}
+
+.go_back {
+  height: $space_xxxl;
+  margin-top: 58px;
+  margin-bottom: $space_xxl;
+  display: flex;
+  gap: $space_xs;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.blocked {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loader {
+  @include loader;
+}
+
+.wrapper {
+  padding: 8px;
+  margin: auto;
+  max-width: 1440px;
+}

@@ -1,0 +1,8 @@
+@use "../../../../../styles/variables.scss" as *;
+
+.text_block {
+  display: flex;
+  align-items: center;
+  gap: $space_xl;
+  margin-bottom: $space_xxl;
+}

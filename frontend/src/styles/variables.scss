@@ -1,0 +1,52 @@
+.light {
+  --brand-color: #518581;
+  --brand-hover: #86aaa7;
+  --primary-color: #151515;
+  --color-secondary: #afadb5;
+  --color-accent-active: #487773;
+  --light-grey: #d9d9d9;
+  --bg-primary: #fff;
+  --bg-secondary-grey: #f3f3f3;
+  --bg-secondary: #fafafa;
+  --shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.25);
+}
+
+.dark {
+  --brand-color: #86aaa7;
+  --brand-hover: #518581;
+  --primary-color: #ffffff;
+  --color-secondary: #d9d9d9;
+  --color-accent-active: #afadb5;
+  --light-grey: #afadb5;
+  --bg-primary: #151515;
+  --bg-secondary-grey: #424242;
+  --bg-secondary: #222222;
+  --shadow: 0px 4px 10px 0px rgba(255, 255, 255, 0.25);
+}
+
+
+$brand-color: var(--brand-color);
+$brand-hover: var(--brand-hover);
+$primary-color: var(--primary-color);
+$color-secondary: var(--color-secondary);
+$color-accent-active: var(--color-accent-active);
+$light-grey: var(--light-grey);
+$bg-primary: var(--bg-primary);
+$bg-secondary-grey: var(--bg-secondary-grey);
+$bg-secondary: var(--bg-secondary);
+$shadow: var(--shadow);
+
+$space_xxxl: 48px;
+$space_xxl: 32px;
+$space_xl: 24px;
+$space_l: 20px;
+$space_m: 16px;
+$space_s: 14px;
+$space_xs: 12px;
+$space_xxs: 8px;
+
+@mixin loader {
+  position: relative;
+  top: 50%;
+  left: 50%;
+}

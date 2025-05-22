@@ -1,0 +1,36 @@
+@use "../../styles/variables" as *;
+
+.multi_dropdown {
+  position: relative;
+  width: 100%;
+
+  &__options {
+    position: absolute;
+    top: calc(100% + $space_xxs);
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    background-color: $bg-primary;
+    box-shadow: $shadow;
+  }
+
+  &__option {
+    display: block;
+    padding: $space_s $space_xs;
+    color: $primary-color;
+    transition: color 0.3s ease;
+    cursor: pointer;
+    appearance: none;
+    border: none;
+    outline: none;
+    background: none;
+
+    &:hover {
+      color: $color-secondary;
+    }
+
+    &_selected {
+      color: $brand-color;
+    }
+  }
+}

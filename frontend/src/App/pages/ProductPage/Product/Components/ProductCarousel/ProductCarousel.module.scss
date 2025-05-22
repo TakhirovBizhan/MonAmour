@@ -1,0 +1,57 @@
+@use "../../../../../../styles/variables.scss" as *;
+
+.root {
+  display: flex;
+  gap: $space_xxxl;
+  position: relative;
+  max-width: 600px;
+  max-height: 600px;
+
+  button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  &__image {
+    width: 600px;
+    height: 600px;
+    object-fit: contain;
+  }
+
+  &__icon_right {
+    position: absolute;
+    right: 2px;
+    top: 40%;
+    border-radius: 40px;
+  }
+
+  &__icon_left {
+    position: absolute;
+    left: 2px;
+    top: 40%;
+    border-radius: 40px;
+  }
+}
+
+.blocked {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loader {
+  @include loader;
+}
+
+@media (max-width: 1024px) {
+  .root {
+    margin: auto;
+    max-width: 600px;
+    max-height: 600px;
+
+    &__image {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+}
