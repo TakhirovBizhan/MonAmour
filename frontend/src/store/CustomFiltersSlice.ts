@@ -1,10 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { IData } from '../config/DataInterfaces';
+import { Painting } from '../config/DataInterfaces';
 
 export interface CustomFilterState {
     order: 'asc' | 'desc' | null,
-    filteredData: IData[] | null
+    filteredData: Painting[] | null
 }
 
 const initialState: CustomFilterState = {
@@ -16,7 +16,7 @@ export const CustomFilterSlice = createSlice({
     name: 'customFilter',
     initialState,
     reducers: {
-        setData: (state, action: PayloadAction<IData[]>) => {
+        setData: (state, action: PayloadAction<Painting[]>) => {
             state.filteredData = action.payload;
         },
 

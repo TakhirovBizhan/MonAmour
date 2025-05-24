@@ -1,6 +1,8 @@
 import { userRegType, userRegResponce, userLogType, userLogResponce } from "../../config/DataInterfaces";
 import { api } from "./api";
 
+// пока не пользуемся
+
 export const AuthApi = api.injectEndpoints({
     endpoints: builder => ({
 

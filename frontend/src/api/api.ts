@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { IData } from '../config/DataInterfaces';
+import { Painting } from '../config/DataInterfaces';
 
 export const useProducts = () => {
-  const [data, setData] = useState<IData[]>([]);
+  const [data, setData] = useState<Painting[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export const useProducts = () => {
 };
 
 export const useProduct = (id: string | undefined) => {
-  const [data, setData] = useState<IData | null>(null);
+  const [data, setData] = useState<Painting | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {

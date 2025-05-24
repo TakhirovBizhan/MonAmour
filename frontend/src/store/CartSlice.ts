@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { IData } from '../config/DataInterfaces';
+import { Painting } from '../config/DataInterfaces';
 
 export interface CartState {
-    data: IData[];
+    data: Painting[];
     fullPrice: number;
 }
 
@@ -27,7 +27,7 @@ export const productUrlSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        addToCart: (state, action: PayloadAction<IData>) => {
+        addToCart: (state, action: PayloadAction<Painting>) => {
             state.data.push(action.payload);
             state.fullPrice = state.data.reduce((sum, item) => sum + item.price, 0);
         },

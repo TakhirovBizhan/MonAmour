@@ -1,5 +1,4 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { SerializedError } from '@reduxjs/toolkit';
@@ -7,28 +6,18 @@ import Button from '../../../../../components/Button';
 import Card from '../../../../../components/Card';
 import Text from '../../../../../components/Text';
 import s from './ProductList.module.scss';
-import { IData } from '../../../../../config/DataInterfaces';
-import { addToCart, removeFromCart } from '../../../../../store/CartSlice';
-import { RootState } from '../../../../../store';
+import { Painting } from '../../../../../config/DataInterfaces';
 
 type ProductListProps = {
-  data: IData[];
+  data: Painting[];
   isLoading: boolean;
   error: FetchBaseQueryError | SerializedError | undefined;
 };
 
 export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error }) => {
-  const dispatch = useDispatch();
-  const cartItems = useSelector((state: RootState) => state.cart.data);
-
-  const handleCartAction = (e: React.MouseEvent, product: IData, inCart: boolean) => {
-    e.preventDefault();
-    if (inCart) {
-      dispatch(removeFromCart(product.id));
-    } else {
-      dispatch(addToCart(product));
-    }
-  };
+  function handleCartAction(...smth: any) {
+    console.log(smth);
+  }
 
   return (
     <div className={s.root}>
@@ -36,20 +25,17 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
         [...Array(9)].map((_, i) => <Card key={i} loading={true} />)
       ) : data ? (
         data.map((product) => {
-          // Проверяем, есть ли товар в корзине по id
-          const inCart = cartItems.some((item: IData) => item.id === product.id);
-
           return (
             <Link key={product.id} to={`/main/product/${product.id}`}>
               <Card
-                image={product.images[0].replace(/[[\]"'\\]/g, '')}
+                image={product.images[0].image_url}
                 captionSlot={product.category.name}
                 title={product.title}
-                subtitle={product.description}
-                contentSlot={`$${product.price}`}
+                subtitle={product.dimensions}
+                contentSlot={`${product.price} p`}
                 actionSlot={
-                  <Button onClick={(e) => handleCartAction(e, product, inCart)}>
-                    <Text view="button">{inCart ? 'Remove from Cart' : 'Add to Cart'}</Text>
+                  <Button onClick={(e) => handleCartAction(e, product)}>
+                    <Text view="button">{'В корзину'}</Text>
                   </Button>
                 }
               />
@@ -57,7 +43,7 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
           );
         })
       ) : error ? (
-        <Text view="p-20">Ooops... Some network errors.</Text>
+        <Text view="p-20">Упс... Проблемы с интернетом.</Text>
       ) : null}
     </div>
   );

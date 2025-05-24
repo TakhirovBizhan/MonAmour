@@ -5,7 +5,7 @@ import SearchInput from './components/SearchInput/SearchInput';
 import Filters from './components/Filters';
 import Pagination from './components/Pagination';
 import ProductsCount from './components/ProductsCount';
-import { useGetAllProductsQuery } from '../../../store/api/Products.api';
+import { useGetProductsQuery } from '../../../store/api/Products.api';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import Loader from '../../../components/Loader';
@@ -20,7 +20,7 @@ const MainPage: React.FC = () => {
 
   const { search, rangeFilter } = useSelector((state: RootState) => state.productUrl);
 
-  const { data, isLoading } = useGetAllProductsQuery({ search, rangeFilter, category });
+  const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category });
 
   const categoryName = categoryRaw ? (categoryData?.name ?? 'Products') : 'Products';
 

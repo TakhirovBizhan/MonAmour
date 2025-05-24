@@ -22,7 +22,7 @@ const Header = () => {
             <div className={styles.logo}>
               <img className={styles.header__logo} src={logoSvg} alt="Логотип" />
               <Text view="min-title" tag="h1" className={styles.title}>
-                e-commerce
+                Mon Amour
               </Text>
             </div>
           </Link>
@@ -34,7 +34,7 @@ const Header = () => {
               isActive ? `${styles.header__nav__link} ${styles.header__nav__link__active}` : styles.header__nav__link
             }
           >
-            <Text view="p-18">Products</Text>
+            <Text view="p-18">Картины</Text>
           </NavLink>
           <NavLink
             to="/categories"
@@ -42,7 +42,7 @@ const Header = () => {
               isActive ? `${styles.header__nav__link} ${styles.header__nav__link__active}` : styles.header__nav__link
             }
           >
-            <Text view="p-18"> Categories</Text>
+            <Text view="p-18">Категории</Text>
           </NavLink>
           <NavLink
             to="/about_us"
@@ -50,7 +50,7 @@ const Header = () => {
               isActive ? `${styles.header__nav__link} ${styles.header__nav__link__active}` : styles.header__nav__link
             }
           >
-            <Text view="p-18">About us</Text>
+            <Text view="p-18">О нас</Text>
           </NavLink>
         </nav>
         <div className={styles.header__icons_block}>
