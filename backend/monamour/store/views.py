@@ -17,6 +17,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django_filters import rest_framework as df_filters
 UUIDFilter = df_filters.UUIDFilter
+from rest_framework.pagination import LimitOffsetPagination
+
 
 
 class PaintingFilter(FilterSet):
@@ -35,6 +37,11 @@ class PaintingFilter(FilterSet):
             'status', 'title', 'category', 'gallery',
             'min_price', 'max_price', 'added_before', 'added_after'
         ]
+
+class PaintingPagination(LimitOffsetPagination):
+    max_limit = 100        # но нельзя запросить больше 100
+    offset_query_param = 'offset'
+    limit_query_param = 'limit'
 
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = Artist.objects.all()
@@ -66,6 +73,7 @@ class PaintingViewSet(viewsets.ModelViewSet):
     serializer_class = PaintingSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PaintingFilter
+    pagination_class = PaintingPagination
 
     def get_queryset(self):
         # пример использования собственного менеджера
