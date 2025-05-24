@@ -6,10 +6,10 @@ import Button from '../../../../../components/Button';
 import Card from '../../../../../components/Card';
 import Text from '../../../../../components/Text';
 import s from './ProductList.module.scss';
-import { Painting } from '../../../../../config/DataInterfaces';
+import { IPaintingData } from '../../../../../config/DataInterfaces';
 
 type ProductListProps = {
-  data: Painting[];
+  data: IPaintingData;
   isLoading: boolean;
   error: FetchBaseQueryError | SerializedError | undefined;
 };
@@ -18,13 +18,14 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
   function handleCartAction(...smth: any) {
     console.log(smth);
   }
+  console.log(data);
 
   return (
     <div className={s.root}>
       {isLoading ? (
         [...Array(9)].map((_, i) => <Card key={i} loading={true} />)
       ) : data ? (
-        data.map((product) => {
+        data.results.map((product) => {
           return (
             <Link key={product.id} to={`/main/product/${product.id}`}>
               <Card

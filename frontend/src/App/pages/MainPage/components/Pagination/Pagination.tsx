@@ -48,7 +48,7 @@ export const Pagination: React.FC<PaginationProps> = ({ pages, category }) => {
 
   return (
     <>
-      {data && data.length !== 0 ? (
+      {data && data.results.length !== 0 ? (
         <>
           <ProductList data={data} error={error} isLoading={isLoading} />
           <div className={s.pagination}>

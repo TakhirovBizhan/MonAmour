@@ -41,8 +41,8 @@ const MainPage: React.FC = () => {
         <div className={s.root__pagination_block}>
           {data ? (
             <>
-              <ProductsCount dataLength={data.length} loading={isLoading} />
-              <Pagination pages={data.length} category={category} />
+              <ProductsCount dataLength={data.count} loading={isLoading} />
+              <Pagination pages={data.count} category={category} />
             </>
           ) : null}
         </div>

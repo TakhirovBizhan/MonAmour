@@ -25,6 +25,13 @@ interface Image {
   image_url: string;
 }
 
+export interface IPaintingData {
+  count: number;
+  next: unknown;
+  previous: unknown;
+  results: Painting[]
+}
+
 export interface Painting {
   id: string;
   title: string;
