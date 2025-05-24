@@ -1,6 +1,6 @@
 export const ROUTES = {
   root: 'main',
-  product: 'main/product/:id',
+  product: 'main/paintings/:id',
   categories: 'categories',
   about_us: 'about_us',
   category: 'category/:id',

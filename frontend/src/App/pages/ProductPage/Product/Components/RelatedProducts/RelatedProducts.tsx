@@ -18,23 +18,23 @@ export const RelatedProducts = (product: Painting) => {
       ) : (
         <div className={s.root}>
           <Text className={s.root__title} view="title">
-            Related Items
+            Похожие товары
           </Text>
           <div className={s.root__list}>
             {data
               .filter((el) => el.category.name === product?.category.name)
               .slice(0, 3)
               .map((el) => (
-                <Link key={el.id} to={`/main/product/${el.id}`}>
+                <Link key={el.id} to={`/main/paintings/${el.id}`}>
                   <Card
-                    image={el.images[0]}
+                    image={el.images[0].image_url}
                     captionSlot={el.category.name}
                     title={el.title}
-                    subtitle={el.description}
-                    contentSlot={`$${el.price}`}
+                    subtitle={el.dimensions}
+                    contentSlot={`${el.price} р`}
                     actionSlot={
                       <Button>
-                        <Text view="button">Add to Cart</Text>
+                        <Text view="button">В корзину</Text>
                       </Button>
                     }
                   />

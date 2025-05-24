@@ -10,7 +10,7 @@ export const useProducts = () => {
     const fetchData = async () => {
       try {
         if (!loading) return;
-        const result = await axios.get('https://api.escuelajs.co/api/v1/products');
+        const result = await axios.get('http://localhost:8000/api/paintings');
         setData(result.data);
       } catch (error) {
         console.error(error);
@@ -31,7 +31,7 @@ export const useProduct = (id: string | undefined) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios.get(`https://api.escuelajs.co/api/v1/products/${id}`);
+        const result = await axios.get(`http://localhost:8000/api/paintings/${id}`);
         setData(result.data);
       } catch (error) {
         console.error(error);

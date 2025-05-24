@@ -35,3 +35,25 @@
     flex-wrap: wrap;
   }
 }
+
+.add_info {
+  margin-top: $space_xxxl;
+  margin-bottom: $space_xl;
+
+  display: flex;
+  gap: 70px;
+  flex-wrap: wrap;
+}
+
+.author_img {
+  border-radius: 1000px;
+  width: 150px;
+  border: 1px solid $brand-color;
+}
+
+.author_block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}

@@ -18,7 +18,6 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
   function handleCartAction(...smth: any) {
     console.log(smth);
   }
-  console.log(data);
 
   return (
     <div className={s.root}>
@@ -27,7 +26,7 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
       ) : data ? (
         data.results.map((product) => {
           return (
-            <Link key={product.id} to={`/main/product/${product.id}`}>
+            <Link key={product.id} to={`/main/paintings/${product.id}`}>
               <Card
                 image={product.images[0].image_url}
                 captionSlot={product.category.name}
