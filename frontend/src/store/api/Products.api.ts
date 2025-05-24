@@ -1,10 +1,10 @@
-import { Painting, TFilters } from "../../config/DataInterfaces";
+import { IPaintingData, TFilters } from "../../config/DataInterfaces";
 import { api } from "./api";
 
 
 export const productsApi = api.injectEndpoints({
     endpoints: builder => ({
-        getProducts: builder.query<Painting[], { page?: number, rangeFilter?: TFilters, search?: string, category?: number } | void>({
+        getProducts: builder.query<IPaintingData, { page?: number, rangeFilter?: TFilters, search?: string, category?: number } | void>({
             query: ({ page = 0, rangeFilter = { price_min: null, price_max: null }, search = '', category } = {}) => {
                 const urlParams = new URLSearchParams();
                 urlParams.append("offset", ((page - 1) * 9).toString())
