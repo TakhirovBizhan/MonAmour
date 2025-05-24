@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'store',
     'orders',
     'rest_framework',
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = {
@@ -62,6 +63,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -138,6 +140,8 @@ USE_I18N = True
 USE_TZ = True
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 
