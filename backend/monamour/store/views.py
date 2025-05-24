@@ -15,22 +15,26 @@ from .serializers import (
 )
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django_filters import rest_framework as df_filters
+UUIDFilter = df_filters.UUIDFilter
 
 
-# Фильтрация для картин
 class PaintingFilter(FilterSet):
     status = filters.CharFilter(field_name='status', lookup_expr='iexact')
+    title = filters.CharFilter(field_name='title', lookup_expr='icontains')        
     min_price = filters.NumberFilter(field_name='price', lookup_expr='gte')
     max_price = filters.NumberFilter(field_name='price', lookup_expr='lte')
-    category = filters.CharFilter(field_name='category__name', lookup_expr='iexact')
-    artist = filters.CharFilter(field_name='artist__name', lookup_expr='icontains')
-    gallery = filters.CharFilter(field_name='gallery__name', lookup_expr='icontains')
+    category = filters.UUIDFilter(field_name='category', lookup_expr='exact')         
+    gallery = filters.UUIDFilter(field_name='gallery', lookup_expr='exact')            
     added_before = filters.DateTimeFilter(field_name='added_at', lookup_expr='lte')
     added_after = filters.DateTimeFilter(field_name='added_at', lookup_expr='gte')
 
     class Meta:
-        model = Painting
-        fields = ['status', 'category', 'artist', 'gallery', 'min_price', 'max_price', 'added_before', 'added_after']
+        model  = Painting
+        fields = [
+            'status', 'title', 'category', 'gallery',
+            'min_price', 'max_price', 'added_before', 'added_after'
+        ]
 
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = Artist.objects.all()
@@ -65,17 +69,13 @@ class PaintingViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # пример использования собственного менеджера
-        qs = Painting.objects.in_stock().expensive(50000)
+        qs = Painting.objects.in_stock() # .expensive(50000)
         qs = qs.select_related('artist', 'gallery').prefetch_related('images')
 
         # lookup-выражения
         params = self.request.query_params
         if params.get('min_price'):
             qs = qs.filter(price__gt=params['min_price'])
-        if params.get('artist'):
-            qs = qs.filter(artist__name__icontains=params['artist'])
-        if params.get('category'):
-            qs = qs.filter(category__name__iexact=params['category'])
 
         # сортировка
         sort = params.get('sort')
