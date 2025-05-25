@@ -5,6 +5,8 @@ from django_filters.rest_framework import DjangoFilterBackend, FilterSet, filter
 from django.utils import timezone
 from django.db import models
 from .models import Artist, Gallery, Category, Painting, Banner
+from rest_framework.permissions import AllowAny
+
 from .serializers import (
     ArtistSerializer,
     GallerySerializer,
@@ -115,23 +117,9 @@ User = get_user_model()
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    Позволяет:
-      - администратору: CRUD по любому пользователю
-      - аутентифицированному юзеру: получать и править свой профиль
+    Открытый CRUD для встроенной модели пользователей:
+    любой (анонимный или авторизованный) может читать, создавать, обновлять и удалять.
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-    def get_permissions(self):
-        # авторизованные могут читать и править только себя
-        if self.action in ('retrieve', 'update', 'partial_update'):
-            return [IsAuthenticated()]
-        # на список, создание и удаление — только админ
-        return [IsAdminUser()]
-    
-    def get_queryset(self):
-        # если это обычный пользователь — пусть видит только себя
-        user = self.request.user
-        if not user.is_staff:
-            return User.objects.filter(pk=user.pk)
-        return super().get_queryset()
+    permission_classes = [AllowAny]
