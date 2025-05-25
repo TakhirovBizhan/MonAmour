@@ -7,6 +7,7 @@ import Card from '../../../../../components/Card';
 import Text from '../../../../../components/Text';
 import s from './ProductList.module.scss';
 import { IPaintingData } from '../../../../../config/DataInterfaces';
+import { useAddMutation } from '../../../../../store/api/Cart.api';
 
 type ProductListProps = {
   data: IPaintingData;
@@ -15,8 +16,13 @@ type ProductListProps = {
 };
 
 export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error }) => {
-  function handleCartAction(...smth: any) {
-    console.log(smth);
+  const [addToCart, { error: addError }] = useAddMutation();
+
+  async function handleCartAction(id: string) {
+    const user_id = localStorage.getItem('currentUser');
+    const resp = await addToCart({ painting_id: id, user_id: user_id ? user_id : 'ss' });
+    console.log(resp);
+    console.log(addError);
   }
 
   return (
@@ -34,7 +40,7 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
                 subtitle={product.dimensions}
                 contentSlot={`${product.price} p`}
                 actionSlot={
-                  <Button onClick={(e) => handleCartAction(e, product)}>
+                  <Button onClick={() => handleCartAction(product.id)}>
                     <Text view="button">{'В корзину'}</Text>
                   </Button>
                 }

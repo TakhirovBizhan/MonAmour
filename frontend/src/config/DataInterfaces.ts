@@ -66,12 +66,11 @@ export type userRegType = {
 }
 
 export type userRegResponce = {
+  id: string,
+  username: string,
   email: string,
-  password: string,
-  name: string,
-  avatar: string,
-  role: string,
-  id: number
+  first_name: string,
+  last_name: string
 }
 
 export type userLogType = {

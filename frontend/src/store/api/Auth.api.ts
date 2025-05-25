@@ -1,7 +1,16 @@
 import { userRegType, userRegResponce, userLogType, userLogResponce } from "../../config/DataInterfaces";
 import { api } from "./api";
 
-// пока не пользуемся
+
+type updateUserType = {
+    id: string,
+    username: string,
+    email: string,
+    first_name: string,
+    last_name: string
+}
+// пока не пользуемся авторизацией
+
 
 export const AuthApi = api.injectEndpoints({
     endpoints: builder => ({
@@ -20,17 +29,26 @@ export const AuthApi = api.injectEndpoints({
                 body: logData,
             }),
         }),
-        getProfile: builder.query<userRegResponce, void>({
+        getProfile: builder.query<userRegResponce, string>({
             query: (logData) => ({
-                url: "/auth/profile",
-                method: "GET",
-                body: logData,
-                headers: {
+                url: `/users/${logData}/`,
+                method: "GET"
+
+                /* headers: {
                     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                },
+                }, */
             }),
         }),
+
+        update: builder.mutation<void, updateUserType>({
+            query: (logData) => ({
+                url: `/users/${logData.id}/`,
+                method: "PUT",
+                body: logData,
+            }),
+        }),
+
     })
 })
 
-export const { useRegisterMutation, useLoginMutation, useGetProfileQuery } = AuthApi;
+export const { useRegisterMutation, useLoginMutation, useUpdateMutation, useGetProfileQuery } = AuthApi;
