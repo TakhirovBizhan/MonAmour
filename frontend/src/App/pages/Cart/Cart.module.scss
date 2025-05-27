@@ -12,3 +12,12 @@
 .price {
     margin-bottom: 20px;
 }
+
+.cart_list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    row-gap: 40px;
+}

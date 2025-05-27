@@ -25,11 +25,11 @@ export const SearchInput = () => {
     <div className={s.search_block}>
       <Input
         className={s.search_block__input}
-        placeholder="Search product"
+        placeholder="Название картины..."
         onChange={(value) => setInputValue(value)}
         value={inputValue}
       />
-      <Button>Find now</Button>
+      <Button>Искать</Button>
     </div>
   );
 };

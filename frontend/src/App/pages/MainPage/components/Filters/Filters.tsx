@@ -39,7 +39,7 @@ export const Filters = () => {
         if (!maxPriceSet) dispatch(setMaxPrice(null));
         if (!minPriceSet) dispatch(setMinPrice(null));
       }}
-      getTitle={() => (filter.length ? filter.map((el) => el.value).join(', ') : 'filters')}
+      getTitle={() => (filter.length ? filter.map((el) => el.value).join(', ') : 'Фильтры')}
     />
   );
 };

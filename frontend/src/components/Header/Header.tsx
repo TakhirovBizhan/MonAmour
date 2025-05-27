@@ -2,7 +2,7 @@ import { NavLink, Link } from 'react-router-dom';
 import Text from '../Text';
 import bagSvg from '../../../public/bag.svg';
 import userSvg from '../../../public/user.svg';
-import logoSvg from '../../../public/favicon.svg';
+import logoSvg from '../../../public/logo.svg';
 import burgerSvg from '../../../public/burger.svg';
 import lightBurger from '../../../public/lightBurger.svg';
 import styles from './Header.module.scss';

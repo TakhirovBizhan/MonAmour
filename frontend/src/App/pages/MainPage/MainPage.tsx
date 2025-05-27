@@ -22,7 +22,7 @@ const MainPage: React.FC = () => {
 
   const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category });
 
-  const categoryName = categoryRaw ? (categoryData?.name ?? 'Products') : 'Products';
+  const categoryName = categoryRaw ? (categoryData?.name ?? 'Картины') : 'Картины';
 
   return (
     <main className={s.root}>
@@ -30,8 +30,8 @@ const MainPage: React.FC = () => {
         <div className={s.root__text_block}>
           {category && categoryLoading ? <Loader size="s" /> : <Text view="title">{categoryName}</Text>}
           <Text view="p-20">
-            We display products based on the latest products we have, if you want to see our old products please enter
-            the name of the item
+            Мы отображаем продукцию на основе последних продуктов, которые у нас есть, если вы хотите увидеть наши
+            старые продукты, введите название товара.
           </Text>
         </div>
         <div className={s.root__search_block}>
