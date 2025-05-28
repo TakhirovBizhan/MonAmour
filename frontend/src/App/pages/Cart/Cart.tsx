@@ -49,7 +49,7 @@ const Cart: React.FC = () => {
                 contentSlot={`${product.painting.price} p`}
                 actionSlot={
                   <Button onClick={() => handleCartAction(product.painting.id)}>
-                    <Text view="button">В корзину</Text>
+                    <Text view="button">Удалить из корзины</Text>
                   </Button>
                 }
               />

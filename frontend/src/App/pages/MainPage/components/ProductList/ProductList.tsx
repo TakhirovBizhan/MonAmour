@@ -18,25 +18,32 @@ type ProductListProps = {
 
 export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error }) => {
   const user_id = localStorage.getItem('currentUser')!;
+
   // 1) Получаем корзину
   const { data: cartData, isFetching: cartLoading } = useGetCartQuery();
+
   // 2) Мутации добавления и удаления
   const [addToCart] = useAddMutation();
   const [removeFromCart] = useDeleteMutation();
 
-  // 3) Собираем Set из id в корзине
-  const cartSet = React.useMemo(() => {
-    if (!cartData) return new Set<string>();
-    return new Set(cartData.map((item) => item.painting.id));
+  // 3) Map<painting.id, cartItem.id> для удаления по реальному ID
+  const cartMap = React.useMemo(() => {
+    const m = new Map<string, string>();
+    cartData?.forEach((item) => {
+      m.set(item.painting.id, item.id);
+    });
+    return m;
   }, [cartData]);
 
   const handleCartAction = async (paintingId: string, inCart: boolean) => {
     if (inCart) {
-      await removeFromCart(paintingId);
+      const cartItemId = cartMap.get(paintingId);
+      if (cartItemId) {
+        await removeFromCart(cartItemId);
+      }
     } else {
       await addToCart({ user: user_id, painting_id: paintingId });
     }
-    // Можно здесь рефетчить корзину автоматически или RTK Query сделает это за вас
   };
 
   if (isLoading || cartLoading) {
@@ -52,7 +59,7 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
   if (error) {
     return (
       <div className={s.root}>
-        <Text view="p-20">Упс... Проблемы с интернетом.</Text>
+        <Text view="p-20">Упс... Какие-то неполадки.</Text>
       </div>
     );
   }
@@ -60,7 +67,8 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
   return (
     <div className={s.root}>
       {data?.results.map((product) => {
-        const inCart = cartSet.has(product.id);
+        const inCart = cartMap.has(product.id);
+
         return (
           <Link key={product.id} to={`/main/paintings/${product.id}`} className={s.link}>
             <Card
