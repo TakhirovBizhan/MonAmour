@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Text from '../../../../components/Text';
 import styles from './Redact.module.scss';
-import { useUpdateMutation } from '../../../../store/api/Auth.api';
+import { useUpdateUserMutation } from '../../../../store/api/Auth.api';
 import { userRegResponce } from '../../../../config/DataInterfaces';
 
 interface RedactModalProps {
@@ -18,13 +18,12 @@ const RedactModal: React.FC<RedactModalProps> = ({ data, isOpen, onClose }) => {
   const [firstName, setFirstName] = useState(data.first_name);
   const [lastName, setLastName] = useState(data.last_name);
 
-  const [updateUser, { error: addError }] = useUpdateMutation();
+  const [updateUser, { error: addError }] = useUpdateUserMutation();
 
   async function handleRedactBtn() {
     const id = localStorage.getItem('currentUser');
     if (id) {
-      const resp = await updateUser({ id, username, email, first_name: firstName, last_name: lastName });
-      console.log(resp);
+      await updateUser({ id, username, email, first_name: firstName, last_name: lastName });
       console.log(addError);
       onClose();
     }
@@ -35,8 +34,6 @@ const RedactModal: React.FC<RedactModalProps> = ({ data, isOpen, onClose }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ username, email, firstName, lastName });
-    // здесь ваш код отправки
   };
 
   return (

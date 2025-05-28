@@ -1,4 +1,3 @@
-// components/Cart/Cart.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import s from './Cart.module.scss';
@@ -57,7 +56,7 @@ const Cart: React.FC = () => {
             </Link>
           ))
         ) : (
-          <Text view="p-18">Ваша корзина пуста.</Text>
+          <Text view="p-18">Ваша корзина пуста</Text>
         )}
       </div>
     </div>
