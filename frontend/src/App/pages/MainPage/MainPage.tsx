@@ -14,7 +14,7 @@ import { useGetCategoryQuery } from '../../../store/api/Categories.api';
 const MainPage: React.FC = () => {
   const pathname = window.location.pathname;
   const categoryRaw = pathname.includes('category') ? pathname.split('/').pop() || '' : '';
-  const category = categoryRaw && !isNaN(Number(categoryRaw)) ? Number(categoryRaw) : undefined;
+  const category = categoryRaw;
 
   const { data: categoryData, isLoading: categoryLoading } = useGetCategoryQuery(category, { skip: !category });
 

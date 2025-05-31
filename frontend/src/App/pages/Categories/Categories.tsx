@@ -21,10 +21,10 @@ export const Categories = () => {
                 <Card
                   className={s.category_card}
                   title={category.name}
-                  image={category.image}
+                  subtitle={category.description}
                   actionSlot={
                     <Button className={s.action_btn}>
-                      <Text view="button">See</Text>
+                      <Text view="button">посмотреть</Text>
                     </Button>
                   }
                 />

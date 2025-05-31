@@ -8,8 +8,8 @@ export const categoriesApi = api.injectEndpoints({
             query: () => `/categories`,
             providesTags: ['categories']
         }),
-        getCategory: builder.query<Category, number | void>({
-            query: (id) => `/categories/${id}`,
+        getCategory: builder.query<Category, string | void>({
+            query: (id) => `/paintings/?category=${id}`,
         }),
     })
 })

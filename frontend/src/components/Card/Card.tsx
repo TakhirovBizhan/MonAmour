@@ -42,9 +42,13 @@ const Card: React.FC<CardProps> = ({
         </div>
       ) : (
         <div className={cn(className, styles.card)} onClick={onClick}>
-          <div className={styles.card__header}>
-            <img className={styles.card__image} src={image} alt="card" />
-          </div>
+          {image ? (
+            <div className={styles.card__header}>
+              <img className={styles.card__image} src={image} alt="card" />
+            </div>
+          ) : (
+            ''
+          )}
           <div className={styles.card__body}>
             {captionSlot && (
               <Text className={styles.card__caption} view="p-14" weight="medium" color="secondary">
