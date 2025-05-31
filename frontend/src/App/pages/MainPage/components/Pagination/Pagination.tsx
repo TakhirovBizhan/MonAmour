@@ -13,7 +13,7 @@ import { useTheme } from '../../../../../hooks/useThemes/themeContext';
 
 type PaginationProps = {
   pages: number;
-  category?: number;
+  category?: string;
 };
 
 export const Pagination: React.FC<PaginationProps> = ({ pages, category }) => {

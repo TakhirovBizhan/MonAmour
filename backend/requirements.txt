@@ -8,3 +8,4 @@ tzdata==2024.1
 pillow==11.1.0
 django-filter>=23.0
 django-cors-headers>=4.0
+reportlab>=3.6.0

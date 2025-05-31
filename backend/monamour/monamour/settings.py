@@ -62,8 +62,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+INSTALLED_APPS += ['debug_toolbar']
+
 MIDDLEWARE = [
-     'corsheaders.middleware.CorsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -72,6 +75,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+INTERNAL_IPS = ['127.0.0.1', 'localhost']
 
 ROOT_URLCONF = 'monamour.urls'
 

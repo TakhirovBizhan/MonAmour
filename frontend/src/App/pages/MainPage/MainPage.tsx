@@ -16,13 +16,13 @@ const MainPage: React.FC = () => {
   const categoryRaw = pathname.includes('category') ? pathname.split('/').pop() || '' : '';
   const category = categoryRaw;
 
-  const { data: categoryData, isLoading: categoryLoading } = useGetCategoryQuery(category, { skip: !category });
+  const { isLoading: categoryLoading } = useGetCategoryQuery(category, { skip: !category });
 
   const { search, rangeFilter } = useSelector((state: RootState) => state.productUrl);
 
   const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category });
 
-  const categoryName = categoryRaw ? (categoryData?.name ?? 'Картины') : 'Картины';
+  const categoryName = categoryRaw ? (data?.results[0].category.name ?? 'Картины') : 'Картины';
 
   return (
     <main className={s.root}>

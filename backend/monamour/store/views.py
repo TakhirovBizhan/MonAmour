@@ -80,7 +80,7 @@ class PaintingViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # пример использования собственного менеджера
         qs = Painting.objects.in_stock() # .expensive(50000)
-        qs = qs.select_related('artist', 'gallery').prefetch_related('images')
+        qs = qs.select_related( 'gallery').prefetch_related('images')
 
         # lookup-выражения
         params = self.request.query_params
