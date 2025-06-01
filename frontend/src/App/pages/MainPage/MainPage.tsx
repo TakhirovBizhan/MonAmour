@@ -2,7 +2,7 @@ import Text from '../../../components/Text';
 import s from './mainPage.module.scss';
 import '../../../styles/styles.scss';
 import SearchInput from './components/SearchInput/SearchInput';
-import Filters from './components/Filters';
+import FiltersByGallery from './components/FilterByGallery';
 import Pagination from './components/Pagination';
 import ProductsCount from './components/ProductsCount';
 import { useGetProductsQuery } from '../../../store/api/Products.api';
@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import Loader from '../../../components/Loader';
 import { useGetCategoryQuery } from '../../../store/api/Categories.api';
+import FiltersByOrder from './components/filterByOrder';
 
 const MainPage: React.FC = () => {
   const pathname = window.location.pathname;
@@ -18,9 +19,9 @@ const MainPage: React.FC = () => {
 
   const { isLoading: categoryLoading } = useGetCategoryQuery(category, { skip: !category });
 
-  const { search, rangeFilter, gallery } = useSelector((state: RootState) => state.productUrl);
+  const { search, rangeFilter, gallery, sort } = useSelector((state: RootState) => state.productUrl);
 
-  const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category, gallery });
+  const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category, gallery, sort });
 
   const categoryName = categoryRaw ? (data?.results[0].category.name ?? 'Картины') : 'Картины';
 
@@ -36,7 +37,10 @@ const MainPage: React.FC = () => {
         </div>
         <div className={s.root__search_block}>
           <SearchInput />
-          <Filters />
+          <div className={s.filters__block}>
+            <FiltersByGallery />
+            <FiltersByOrder />
+          </div>
         </div>
         <div className={s.root__pagination_block}>
           {data ? (

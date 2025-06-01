@@ -6,14 +6,16 @@ export interface ProductUrlState {
     page: number;
     rangeFilter: TFilters;
     search: string;
-    gallery: string
+    gallery: string;
+    sort: string;
 }
 
 const initialState: ProductUrlState = {
     page: 1,
     rangeFilter: { price_min: null, price_max: null },
     search: '',
-    gallery: ''
+    gallery: '',
+    sort: ''
 };
 
 export const productUrlSlice = createSlice({
@@ -41,8 +43,11 @@ export const productUrlSlice = createSlice({
         setGallery: (state, action: PayloadAction<string>) => {
             state.gallery = action.payload;
         },
+        setSort: (state, action: PayloadAction<string>) => {
+            state.sort = action.payload;
+        },
     },
 });
 
-export const { setPage, setMinPrice, setMaxPrice, setSearch, incrementPage, decrementPage, setGallery } = productUrlSlice.actions;
+export const { setPage, setMinPrice, setMaxPrice, setSearch, incrementPage, decrementPage, setGallery, setSort } = productUrlSlice.actions;
 export default productUrlSlice.reducer;
