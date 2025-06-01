@@ -4,9 +4,12 @@ from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage
 from django.contrib.auth import get_user_model
 
 class ArtistSerializer(serializers.ModelSerializer):
+    resume = serializers.FileField(required=False)
+    
     class Meta:
         model = Artist
-        fields = ['id', 'name', 'image', 'biography']
+        fields = ['id', 'name', 'image', 'biography', 'resume', 'website']
+        
 
 class GallerySerializer(serializers.ModelSerializer):
     class Meta:

@@ -7,76 +7,74 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
-# Импортируем ReportLab-модули для регистратуры TTF-шрифтов:
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from django.http import HttpResponse
+# # Импортируем ReportLab-модули для регистратуры TTF-шрифтов:
+# from reportlab.pdfgen import canvas
+# from reportlab.lib.pagesizes import A4
+# from reportlab.pdfbase import pdfmetrics
+# from reportlab.pdfbase.ttfonts import TTFont
+# from django.http import HttpResponse
 
 
-FONT_PATH = 'monamour/Roboto/roboto.ttf'  # скорректируйте, если путь другой
+# FONT_PATH = 'monamour/Roboto/roboto.ttf'  # скорректируйте, если путь другой
 
-# 1) Зарегистрируем шрифт под именем 'DejaVuSans'
-pdfmetrics.registerFont(TTFont('Roboto', FONT_PATH))
+# pdfmetrics.registerFont(TTFont('roboto', FONT_PATH))
 
 
-def generate_orders_pdf(modeladmin, request, queryset):
-    if not queryset.exists():
-        return
-    order = queryset.first()
+# def generate_orders_pdf(modeladmin, request, queryset):
+#     if not queryset.exists():
+#         return
+#     order = queryset.first()
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="order_{order.id}.pdf"'
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = f'attachment; filename="order_{order.id}.pdf"'
 
-    # 2) Создаём canvas
-    p = canvas.Canvas(response, pagesize=A4)
-    width, height = A4
+#     # 2) Создаём canvas
+#     p = canvas.Canvas(response, pagesize=A4)
+#     width, height = A4
 
-    # 3) Указываем зарегистрированный шрифт «DejaVuSans»
-    # вместо стандартного Helvetica
-    p.setFont("Roboto", 16)
-    p.drawString(50, height - 50, f"Счёт-фактура для заказа #{order.id}")
+#     p.setFont("roboto", 16)
+#     p.drawString(50, height - 50, f"Счёт-фактура для заказа #{order.id}")
 
-    p.setFont("Roboto", 11)
-    p.drawString(50, height - 80, f"Покупатель: {order.user.get_full_name() or order.user.username}")
-    p.drawString(50, height - 100, f"Email: {order.user.email}")
-    p.drawString(50, height - 120, f"Адрес доставки: {order.delivery_address}")
-    p.drawString(50, height - 150, f"Дата заказа: {order.order_date.strftime('%Y-%m-%d %H:%M:%S')}")
-    p.drawString(350, height - 150, f"Статус: {order.get_status_display()}")
+#     p.setFont("roboto", 11)
+#     p.drawString(50, height - 80, f"Покупатель: {order.user.get_full_name() or order.user.username}")
+#     p.drawString(50, height - 100, f"Email: {order.user.email}")
+#     p.drawString(50, height - 120, f"Адрес доставки: {order.delivery_address}")
+#     p.drawString(50, height - 150, f"Дата заказа: {order.order_date.strftime('%Y-%m-%d %H:%M:%S')}")
+#     p.drawString(350, height - 150, f"Статус: {order.get_status_display()}")
 
-    y = height - 180
-    p.setFont("Roboto", 12)
-    p.drawString(50, y, "Товары в заказе:")
-    y -= 20
-    p.setFont("Roboto", 10)
+#     y = height - 180
+#     p.setFont("roboto", 12)
+#     p.drawString(50, y, "Товары в заказе:")
+#     y -= 20
+#     p.setFont("roboto", 10)
 
-    items = OrderItem.objects.filter(order=order).select_related('painting')
-    for item in items:
-        if y < 100:
-            p.showPage()
-            p.setFont("Roboto", 10)
-            y = height - 100
+#     items = OrderItem.objects.filter(order=order).select_related('painting')
+#     for item in items:
+#         if y < 100:
+#             p.showPage()
+#             p.setFont("roboto", 10)
+#             y = height - 100
 
-        painting_title = item.painting.title
-        price = f"{item.price_at_purchase:.2f} ₽"
-        purchased_at = item.purchased_at.strftime('%Y-%m-%d %H:%M')
-        p.drawString(50, y, painting_title)
-        p.drawString(250, y, price)
-        p.drawString(400, y, purchased_at)
-        y -= 50
+#         painting_title = item.painting.title
+#         price = f"{item.price_at_purchase:.2f} ₽"
+#         purchased_at = item.purchased_at.strftime('%Y-%m-%d %H:%M')
+#         p.drawString(50, y, painting_title)
+#         p.drawString(250, y, price)
+#         p.drawString(400, y, purchased_at)
+#         y -= 50
 
-    if y < 80:
-        p.showPage()
-        y = height - 50
-    p.setFont("Roboto", 12)
-    p.drawString(50, y, f"Общая сумма товаров: {order.total_amount:.2f}")
+#     if y < 80:
+#         p.showPage()
+#         y = height - 50
+#     p.setFont("roboto", 12)
+#     p.drawString(50, y, f"Общая сумма товаров: {order.total_amount:.2f}")
 
-    p.showPage()
-    p.save()
-    return response
+#     p.showPage()
+#     p.save()
+#     return response
 
-generate_orders_pdf.short_description = "Скачать PDF для первого выбранного заказа"
+# generate_orders_pdf.short_description = "Скачать PDF для первого выбранного заказа"
+
 
 # 1. Определяем форму для Order с кастомным M2M-полем
 class OrderForm(forms.ModelForm):
@@ -130,7 +128,7 @@ class OrderAdmin(admin.ModelAdmin):
     date_hierarchy = 'order_date'
     raw_id_fields = ('user',)
     inlines = []
-    actions = ['mark_shipped', generate_orders_pdf]
+    actions = ['mark_shipped']
 
     @admin.action(description='Отметить как отправленные')
     def mark_shipped(self, request, queryset):

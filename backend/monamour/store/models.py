@@ -24,6 +24,22 @@ class Artist(models.Model):
     name = models.CharField(max_length=255, verbose_name='Имя художника')
     image = models.ImageField(upload_to='Artists/', blank=True, verbose_name='Изображение')
     biography = models.TextField(verbose_name='Биография')
+        # --- вот добавили поле для PDF --
+    resume = models.FileField(
+        upload_to='artist_resumes/',
+        blank=True,
+        null=True,
+        verbose_name='Резюме (PDF)'
+    )
+    
+    # <-- новое поле для хранения URL сайта художника -->
+    website = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name='Официальный сайт'
+    )
+
     
     def __str__(self):
         return self.name

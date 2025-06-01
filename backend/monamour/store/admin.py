@@ -9,10 +9,23 @@ class ArtistAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'short_biography')
     search_fields = ('biography', 'name',)
     list_display_links = ('id', 'name')
+    
+    fields = (
+        'name',
+        'image',
+        'biography',
+        'resume',
+        'website',
+    )
 
     @admin.display(description='Краткая биография')
     def short_biography(self, obj):
         return obj.biography[:50] if obj.biography else ''
+    
+    @admin.display(description='Есть резюме')
+    def has_resume(self, obj):
+        return bool(obj.resume)
+    
 
 @admin.register(Gallery)
 class GalleryAdmin(admin.ModelAdmin):
