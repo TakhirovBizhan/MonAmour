@@ -9,9 +9,17 @@ export const Filters = () => {
   const [filter, setFilterState] = useState<Option[]>([]);
   const [filterData, setFilterData] = useState<Option[]>([]);
   const dispatch = useDispatch();
-  const setFilterStateFull = (Option: Option[]) => {
-    dispatch(setGallery(Option[0].key));
-    setFilterState(Option);
+
+  const handleChange = (value: Option[]) => {
+    if (value.length === 0) {
+      // Сбросили выбор
+      dispatch(setGallery(''));
+      setFilterState([]);
+    } else {
+      // Выбрали новую опцию (массив всегда [Option])
+      dispatch(setGallery(value[0].key));
+      setFilterState(value);
+    }
   };
 
   useEffect(() => {
@@ -37,10 +45,8 @@ export const Filters = () => {
       className={s.multiDropdown}
       options={filterData}
       value={filter}
-      onChange={(value: Option[]) => {
-        setFilterStateFull(value);
-      }}
-      getTitle={() => (filter.length ? filter.map((el) => el.value).join(', ') : 'Галерея')}
+      onChange={handleChange}
+      getTitle={(value) => (value.length > 0 ? value[0].value : 'Галерея')}
     />
   );
 };
