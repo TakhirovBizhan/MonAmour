@@ -21,6 +21,9 @@ from django_filters import rest_framework as df_filters
 UUIDFilter = df_filters.UUIDFilter
 from rest_framework.pagination import LimitOffsetPagination
 
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 
 
 class PaintingFilter(FilterSet):
@@ -64,6 +67,16 @@ class GalleryViewSet(viewsets.ModelViewSet):
     serializer_class = GallerySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
+    
+    @action(detail=False, methods=['get'], url_path='id-name')
+    def id_name_list(self, request):
+        """
+        Дополнительный экшен, который возвращает только пары {id, name} для всех галерей.
+        Доступно по адресу: GET /api/galleries/id-name/
+        """
+        # .values('id', 'name') вернёт список словарей вида [{'id': ..., 'name': '...'}, ...]
+        data = Gallery.objects.values('id', 'name')
+        return Response(data)
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
