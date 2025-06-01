@@ -6,7 +6,7 @@ from store.models import Painting
 class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='carts')
-    painting = models.OneToOneField(Painting, on_delete=models.CASCADE)  # так как картина уникальна для покупки
+    painting = models.ForeignKey(Painting, on_delete=models.CASCADE)  
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
