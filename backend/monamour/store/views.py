@@ -45,11 +45,19 @@ class PaintingPagination(LimitOffsetPagination):
     offset_query_param = 'offset'
     limit_query_param = 'limit'
 
+class ArtistFilter(FilterSet):
+    name = filters.CharFilter(field_name='name', lookup_expr='contains')
+    class Meta:
+        model = Artist
+        fields = ['name']
+        
+        
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = Artist.objects.all()
     serializer_class = ArtistSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
+    filterset_class = ArtistFilter
 
 class GalleryViewSet(viewsets.ModelViewSet):
     queryset = Gallery.objects.all()
