@@ -17,8 +17,8 @@ type PaginationProps = {
 };
 
 export const Pagination: React.FC<PaginationProps> = ({ pages, category }) => {
-  const { page: currentPage, search, rangeFilter } = useSelector((state: RootState) => state.productUrl);
-  const { data, isLoading, error } = useGetProductsQuery({ page: currentPage, search, rangeFilter, category });
+  const { page: currentPage, search, rangeFilter, gallery } = useSelector((state: RootState) => state.productUrl);
+  const { data, isLoading, error } = useGetProductsQuery({ page: currentPage, search, rangeFilter, category, gallery });
   const dispatch = useDispatch();
 
   const { theme } = useTheme();

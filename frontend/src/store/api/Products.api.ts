@@ -4,8 +4,8 @@ import { api } from "./api";
 
 export const productsApi = api.injectEndpoints({
     endpoints: builder => ({
-        getProducts: builder.query<IPaintingData, { page?: number, rangeFilter?: TFilters, search?: string, category?: string } | void>({
-            query: ({ page = 0, rangeFilter = { price_min: null, price_max: null }, search = '', category } = {}) => {
+        getProducts: builder.query<IPaintingData, { page?: number, rangeFilter?: TFilters, search?: string, category?: string, gallery?: string } | void>({
+            query: ({ page = 0, rangeFilter = { price_min: null, price_max: null }, search = '', category, gallery } = {}) => {
                 const urlParams = new URLSearchParams();
                 urlParams.append("offset", ((page - 1) * 9).toString())
                 urlParams.append("limit", '9')
@@ -16,6 +16,11 @@ export const productsApi = api.injectEndpoints({
                     urlParams.delete('category')
                 }
 
+                if (gallery) {
+                    urlParams.set('gallery', gallery)
+                } else {
+                    urlParams.delete('gallery')
+                }
                 if (rangeFilter.price_min && rangeFilter.price_max) {
                     urlParams.set('max_price', rangeFilter.price_max.toString());
                     urlParams.set('min_price', rangeFilter.price_min.toString());

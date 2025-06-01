@@ -18,9 +18,9 @@ const MainPage: React.FC = () => {
 
   const { isLoading: categoryLoading } = useGetCategoryQuery(category, { skip: !category });
 
-  const { search, rangeFilter } = useSelector((state: RootState) => state.productUrl);
+  const { search, rangeFilter, gallery } = useSelector((state: RootState) => state.productUrl);
 
-  const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category });
+  const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category, gallery });
 
   const categoryName = categoryRaw ? (data?.results[0].category.name ?? 'Картины') : 'Картины';
 

@@ -1,45 +1,46 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MultiDropdown, { Option } from '../../../../../components/MultiDropdown';
 import s from './filters.module.scss';
+import axios from 'axios';
 import { useDispatch } from 'react-redux';
-import { setMinPrice, setMaxPrice } from '../../../../../store/ProductUrlSlice';
+import { setGallery } from '../../../../../store/ProductUrlSlice';
 
 export const Filters = () => {
   const [filter, setFilterState] = useState<Option[]>([]);
+  const [filterData, setFilterData] = useState<Option[]>([]);
   const dispatch = useDispatch();
+  const setFilterStateFull = (Option: Option[]) => {
+    dispatch(setGallery(Option[0].key));
+    setFilterState(Option);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await axios.get('http://localhost:8000/api/galleries/id-name/');
+        setFilterData(
+          result.data.map((item: { id: string; name: string }) => ({
+            key: item.id,
+            value: item.name,
+          })),
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <MultiDropdown
       className={s.multiDropdown}
-      options={[{ key: 'min=50_max=100', value: 'between 50$ and 100$' }]}
+      options={filterData}
       value={filter}
       onChange={(value: Option[]) => {
-        setFilterState(value);
-
-        if (value.length === 0) {
-          dispatch(setMaxPrice(null));
-          dispatch(setMinPrice(null));
-          return;
-        }
-
-        let maxPriceSet = false;
-        let minPriceSet = false;
-
-        value.forEach((el) => {
-          if (el.key === 'min=50_max=100') {
-            const [minPart, maxPart] = el.key.split('_');
-            const minPrice = Number(minPart.split('=')[1]);
-            const maxPrice = Number(maxPart.split('=')[1]);
-            dispatch(setMinPrice(minPrice));
-            dispatch(setMaxPrice(maxPrice));
-            maxPriceSet = true;
-            minPriceSet = true;
-          }
-        });
-
-        if (!maxPriceSet) dispatch(setMaxPrice(null));
-        if (!minPriceSet) dispatch(setMinPrice(null));
+        setFilterStateFull(value);
       }}
-      getTitle={() => (filter.length ? filter.map((el) => el.value).join(', ') : 'Фильтры')}
+      getTitle={() => (filter.length ? filter.map((el) => el.value).join(', ') : 'Галерея')}
     />
   );
 };
