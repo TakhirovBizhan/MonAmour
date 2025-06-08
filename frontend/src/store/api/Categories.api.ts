@@ -9,7 +9,7 @@ export const categoriesApi = api.injectEndpoints({
             providesTags: ['categories']
         }),
         getCategory: builder.query<Category, string | void>({
-            query: (id) => `/paintings/?category=${id}`,
+            query: (id) => `/categories/${id}`,
         }),
     })
 })

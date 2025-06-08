@@ -8,28 +8,27 @@ import ProductsCount from './components/ProductsCount';
 import { useGetProductsQuery } from '../../../store/api/Products.api';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
-import Loader from '../../../components/Loader';
-import { useGetCategoryQuery } from '../../../store/api/Categories.api';
 import FiltersByOrder from './components/filterByOrder';
+import { useGetCategoryQuery } from '../../../store/api/Categories.api';
 
-const MainPage: React.FC = () => {
+const MainPage = () => {
   const pathname = window.location.pathname;
   const categoryRaw = pathname.includes('category') ? pathname.split('/').pop() || '' : '';
   const category = categoryRaw;
 
-  const { isLoading: categoryLoading } = useGetCategoryQuery(category, { skip: !category });
+  const { data: CategoryData } = useGetCategoryQuery(category);
 
   const { search, rangeFilter, gallery, sort } = useSelector((state: RootState) => state.productUrl);
 
   const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category, gallery, sort });
 
-  const categoryName = categoryRaw ? (data?.results[0].category.name ?? 'Картины') : 'Картины';
+  const categoryName = categoryRaw ? CategoryData?.name : 'Картины';
 
   return (
     <main className={s.root}>
       <div className={s.wrapper}>
         <div className={s.root__text_block}>
-          {category && categoryLoading ? <Loader size="s" /> : <Text view="title">{categoryName}</Text>}
+          <Text view="title">{categoryName}</Text>
           <Text view="p-20">
             Мы отображаем продукцию на основе последних продуктов, которые у нас есть, если вы хотите увидеть наши
             старые продукты, введите название товара.
@@ -48,7 +47,9 @@ const MainPage: React.FC = () => {
               <ProductsCount dataLength={data.count} loading={isLoading} />
               <Pagination pages={data.count} category={category} />
             </>
-          ) : null}
+          ) : (
+            <div>Нет данных...</div>
+          )}
         </div>
       </div>
     </main>
