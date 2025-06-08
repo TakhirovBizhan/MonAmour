@@ -15,9 +15,9 @@ export const ProductsCount: React.FC<TotalProductsProps> = ({ loading, dataLengt
       ) : (
         <div className={s.text_block}>
           <Text view="min-title" weight="bold">
-            Total Product
+            Количество товаров
           </Text>
-          <Text view="p-20" color="accent">
+          <Text view="min-title" color="accent">
             {dataLength}
           </Text>
         </div>
