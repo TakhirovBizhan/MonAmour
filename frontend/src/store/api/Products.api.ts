@@ -1,5 +1,6 @@
-import { IPaintingData, TFilters } from "../../config/DataInterfaces";
+import { IPaintingData, PaintingPostType, TFilters } from "../../config/DataInterfaces";
 import { api } from "./api";
+
 
 
 export const productsApi = api.injectEndpoints({
@@ -44,9 +45,16 @@ export const productsApi = api.injectEndpoints({
 
                 return `/paintings?${urlParams.toString()}`
             },
-            providesTags: ['paintings']
+
+        }),
+        addPainting: builder.mutation<void, PaintingPostType>({
+            query: (regData) => ({
+                url: "/paintings/",
+                method: "POST",
+                body: regData,
+            }),
         })
     })
 })
 
-export const { useGetProductsQuery } = productsApi;
+export const { useGetProductsQuery, useAddPaintingMutation } = productsApi;

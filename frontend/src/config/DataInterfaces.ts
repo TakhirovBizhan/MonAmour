@@ -20,7 +20,7 @@ export interface Category {
   updated_at: string;
 }
 
-interface Image {
+export interface Image {
   id: string;
   image_url: string;
 }
@@ -30,6 +30,19 @@ export interface IPaintingData {
   next: unknown;
   previous: unknown;
   results: Painting[]
+}
+
+export interface PaintingPostType {
+  title: string;
+  description: string;
+  artist: Artist;
+  gallery: Gallery;
+  category: Category;
+  technique: string;
+  dimensions: string;
+  price: string;           // Цена в виде строки (например, "30000.00")
+  status: string;          // Например, "available"
+  images: Image[];
 }
 
 export interface Painting {

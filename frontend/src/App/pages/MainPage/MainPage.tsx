@@ -10,6 +10,9 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import FiltersByOrder from './components/filterByOrder';
 import { useGetCategoryQuery } from '../../../store/api/Categories.api';
+import { useState } from 'react';
+import Button from '../../../components/Button';
+import AddPaintingModal from './components/AddPaintingModal/addPaintingModal';
 
 const MainPage = () => {
   const pathname = window.location.pathname;
@@ -23,6 +26,8 @@ const MainPage = () => {
   const { data, isLoading } = useGetProductsQuery({ search, rangeFilter, category, gallery, sort });
 
   const categoryName = categoryRaw ? CategoryData?.name : 'Картины';
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   return (
     <main className={s.root}>
@@ -39,6 +44,8 @@ const MainPage = () => {
           <div className={s.filters__block}>
             <FiltersByGallery />
             <FiltersByOrder />
+            <Button onClick={() => setIsModalOpen(true)}>+</Button>
+            <AddPaintingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
           </div>
         </div>
         <div className={s.root__pagination_block}>
