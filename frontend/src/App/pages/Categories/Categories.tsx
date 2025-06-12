@@ -5,8 +5,13 @@ import Loader from '../../../components/Loader';
 import Text from '../../../components/Text';
 import { useGetCategoriesQuery } from '../../../store/api/Categories.api';
 import s from './Categories.module.scss';
+import cn from 'classnames';
 
-export const Categories = () => {
+type categoryProps = {
+  className?: string;
+};
+
+export const Categories: React.FC<categoryProps> = ({ className }) => {
   const { data, isLoading, error } = useGetCategoriesQuery();
 
   return (
@@ -15,7 +20,7 @@ export const Categories = () => {
         {isLoading ? (
           <Loader size="l" />
         ) : data ? (
-          <div className={s.category_list}>
+          <div className={cn(s.category_list, className)}>
             {data.map((category) => (
               <Link key={category.id} to={`/category/${category.id}`}>
                 <Card
@@ -32,7 +37,7 @@ export const Categories = () => {
             ))}
           </div>
         ) : error ? (
-          <Text view="p-20">ooops.. Some error, we already trying to fix up.</Text>
+          <Text view="p-20">Данных нет, ошибка...</Text>
         ) : null}
       </div>
     </main>

@@ -1,0 +1,22 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/styles.scss" as *;
+
+.artist_img{
+    width: 300px;
+    border-radius: 100px;
+    border: 2px solid $brand-color;
+}
+
+.wrapper {
+    @include wrapper;
+    margin-top: 100px;
+    display: flex;
+    gap: 20px;
+}
+
+.text_block {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+

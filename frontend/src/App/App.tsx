@@ -4,6 +4,7 @@ import { ROUTES } from '../config/routes';
 import { ThemeProvider } from '../hooks/useThemes/themeProvider';
 import ProtectedLayout from './AppLayout';
 import { AuthProvider } from '../hooks/useAuth/AuthProvider';
+import { Artist } from './pages/Artist/Artist';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
               <Route path={ROUTES.auth} element={<AuthPage />} />
               <Route path={ROUTES.profile} element={<Profile />} />
               <Route path={ROUTES.cart} element={<Cart />} />
+              <Route path={ROUTES.artist} element={<Artist />} />
               <Route path="*" element={<Navigate to={ROUTES.root} replace />} />
               <Route path="/" element={<Navigate to={ROUTES.root} replace />} />
             </Route>

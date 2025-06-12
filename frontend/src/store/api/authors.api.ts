@@ -18,9 +18,17 @@ export const CartApi = api.injectEndpoints({
                 method: "GET",
             }),
         }),
+
+        getArtist: builder.query<artistResponce, string>({
+            query: (id) => ({
+                url: `/artists/${id}`,
+                method: "GET",
+            }),
+        }),
     }),
 });
 
 export const {
     useGetArtistsQuery,
+    useGetArtistQuery
 } = CartApi;
