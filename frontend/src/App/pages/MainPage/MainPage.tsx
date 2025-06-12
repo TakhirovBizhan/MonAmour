@@ -13,6 +13,8 @@ import { useGetCategoryQuery } from '../../../store/api/Categories.api';
 import { useState } from 'react';
 import Button from '../../../components/Button';
 import AddPaintingModal from './components/AddPaintingModal/addPaintingModal';
+import AuthorWidget from './components/Widgets/authorWidget';
+import CategoryWidget from './components/Widgets/categoryWidget';
 
 const MainPage = () => {
   const pathname = window.location.pathname;
@@ -32,6 +34,17 @@ const MainPage = () => {
   return (
     <main className={s.root}>
       <div className={s.wrapper}>
+        {categoryRaw === '' ? (
+          <div className={s.widget_block}>
+            <Text view="title">Художники</Text>
+            <AuthorWidget />
+
+            <Text view="title">Категории</Text>
+            <CategoryWidget />
+          </div>
+        ) : (
+          ''
+        )}
         <div className={s.root__text_block}>
           <Text view="title">{categoryName}</Text>
           <Text view="p-20">

@@ -5,7 +5,7 @@
   margin-bottom: 100px;
 
   &__text_block {
-    margin-top: 100px;
+    margin-top: 50px;
     display: flex;
     flex-direction: column;
     gap: $space_xl;
@@ -36,4 +36,10 @@
   display: flex;
   gap: 30px;
   flex-wrap: wrap;
+}
+
+.widget_block {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }

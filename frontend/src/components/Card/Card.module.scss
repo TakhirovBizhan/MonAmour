@@ -3,7 +3,7 @@
 .card {
   width: 100%;
   width: 360px;
-  height: 618px;
+  max-height: 618px;
   background-color: $bg-primary;
   transition: box-shadow 0.3s ease;
   overflow: hidden;

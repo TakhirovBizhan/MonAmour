@@ -1,0 +1,38 @@
+.wrapper {
+    margin-top: 20px;
+}
+
+.author_list {
+    display: flex;            // выстраиваем элементы в строку
+    flex-wrap: nowrap;        // запрет переноса на новую строку
+    overflow-x: auto;         // включаем горизонтальный скролл при переполнении
+    overflow-y: hidden;       // скрываем вертикальный скролл (если не нужен)
+    list-style: none;         // убираем маркеры, если это ul/ol
+    padding: 0;               // по необходимости сбросим отступы
+    margin: 0;
+    gap: 30px;
+  
+    // Дополнительно: добавим небольшой отступ внутри, чтобы элементы не «прилипали» к краям контейнера
+    padding-left: 8px;
+    padding-right: 8px;
+  
+    // Опционально: добавим плавный скроллинг (на современных браузерах)
+    scroll-behavior: smooth;
+  
+    // Опционально: включим «привязку» к элементам при скролле (scroll snap)
+    scroll-snap-type: x mandatory;
+    
+    // Стили для скрытия скроллбара (не обязательно, зависит от задачи и UX)
+    // Для WebKit-браузеров (Chrome, Safari, Edge на Chromium):
+    &::-webkit-scrollbar {
+      height: 8px;            // если хотите оставить тонкий скроллбар, иначе display: none
+      // display: none;       // если нужно полностью скрыть
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+    }
+    // Для Firefox:
+    scrollbar-width: thin;    // "auto" | "thin" | "none"
+    scrollbar-color: rgba(0,0,0,0.3) transparent;
+}
