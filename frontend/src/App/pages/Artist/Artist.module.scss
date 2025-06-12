@@ -12,11 +12,13 @@
     margin-top: 100px;
     display: flex;
     gap: 20px;
+    flex-wrap: wrap;
 }
 
 .text_block {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    width: 800px;
 }
 
