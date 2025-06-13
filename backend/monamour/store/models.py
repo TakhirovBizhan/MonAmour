@@ -133,7 +133,9 @@ class Promotion(models.Model):
 
 class PaintingImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    painting = models.ForeignKey(Painting, on_delete=models.CASCADE, related_name='images', verbose_name='Картина')
+    painting = models.ForeignKey(Painting, on_delete=models.CASCADE, related_name='images', verbose_name='Картина', 
+        null=True,      
+        blank=True)
     image = models.ImageField(upload_to='paintings/', verbose_name='Изображение')
 
     def __str__(self):
