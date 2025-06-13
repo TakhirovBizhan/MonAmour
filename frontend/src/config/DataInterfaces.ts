@@ -35,14 +35,14 @@ export interface IPaintingData {
 export interface PaintingPostType {
   title: string;
   description: string;
-  artist: Artist;
-  gallery: Gallery;
-  category: Category;
+  artist_id: string;
+  gallery_id: string;
+  category_id: string;
   technique: string;
   dimensions: string;
-  price: string;           // Цена в виде строки (например, "30000.00")
-  status: string;          // Например, "available"
-  images: Image[];
+  price: string;
+  status: 'available' | 'sold';
+  image_ids: string[];
 }
 
 export interface Painting {

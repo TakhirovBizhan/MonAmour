@@ -1,45 +1,45 @@
 // components/AddPaintingModal/AddPaintingModal.tsx
 import React, { useState, useEffect } from 'react';
-
 import styles from './AddPaintingModal.module.scss';
-import { useAddPaintingMutation } from '../../../../../store/api/Products.api';
+import { useAddPaintingMutation, useUploadImageBase64Mutation } from '../../../../../store/api/Products.api';
 import Button from '../../../../../components/Button';
 import Text from '../../../../../components/Text';
-
-const ARTISTS = [
-  { id: '1', name: 'Катя Иванова' },
-  { id: '2', name: 'Иван Петров' },
-];
-const GALLERIES = [
-  { id: '1', name: 'Галерея №1' },
-  { id: '2', name: 'Галерея №2' },
-];
-const CATEGORIES = [
-  { id: '1', name: 'Пейзаж' },
-  { id: '2', name: 'Портрет' },
-];
-const STATUSES = [
-  { value: 'available', label: 'Available' },
-  { value: 'sold', label: 'Sold' },
-];
-
-const initialForm = {
-  title: '',
-  description: '',
-  artist: ARTISTS[0].id,
-  gallery: GALLERIES[0].id,
-  category: CATEGORIES[0].id,
-  technique: '',
-  dimensions: '',
-  price: '',
-  status: STATUSES[0].value,
-  images: [] as File[],
-};
+import { useGetCategoriesQuery } from '../../../../../store/api/Categories.api';
+import { useGetArtistsQuery } from '../../../../../store/api/authors.api';
+import { useGetGalleriesQuery } from '../../../../../store/api/Galleries.api';
+import { PaintingPostType } from '../../../../../config/DataInterfaces';
 
 export const AddPaintingModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
-  const [addPainting, { isLoading }] = useAddPaintingMutation();
+  const [addPainting] = useAddPaintingMutation();
+  const [uploadImageBase64] = useUploadImageBase64Mutation();
+
+  const { data: categoriesData } = useGetCategoriesQuery();
+  const { data: artistsData } = useGetArtistsQuery();
+  const { data: galleryData } = useGetGalleriesQuery();
+
+  const initialForm = {
+    title: '',
+    description: '',
+    artist: '',
+    gallery: '',
+    category: '',
+    technique: '',
+    dimensions: '',
+    price: '',
+    status: 'available',
+    images: [] as File[],
+  };
   const [form, setForm] = useState(initialForm);
   const [previews, setPreviews] = useState<string[]>([]);
+
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      artist: prev.artist || (artistsData && artistsData.length > 0 ? artistsData[0].id : ''),
+      gallery: prev.gallery || (galleryData && galleryData.length > 0 ? galleryData[0].id : ''),
+      category: prev.category || (categoriesData && categoriesData.length > 0 ? categoriesData[0].id : ''),
+    }));
+  }, [artistsData, galleryData, categoriesData]);
 
   useEffect(() => {
     if (!form.images.length) {
@@ -48,11 +48,14 @@ export const AddPaintingModal: React.FC<{ isOpen: boolean; onClose: () => void }
     }
     const urls = form.images.map((f) => URL.createObjectURL(f));
     setPreviews(urls);
-    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
   }, [form.images]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type, files } = e.target as HTMLInputElement;
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, files } = target;
     if (type === 'file' && files) {
       setForm((prev) => ({ ...prev, images: [...prev.images, ...Array.from(files)] }));
     } else {
@@ -60,25 +63,64 @@ export const AddPaintingModal: React.FC<{ isOpen: boolean; onClose: () => void }
     }
   };
 
+  // Прочитать File как Data URL (включая префикс "data:image/...")
+  const fileToDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result);
+      };
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // simple HTML5 validation
     const formEl = e.currentTarget;
     if (!formEl.checkValidity()) {
       formEl.reportValidity();
       return;
     }
-    const data = new FormData();
-    Object.entries(form).forEach(([key, val]) => {
-      if (key === 'images') {
-        (val as File[]).forEach((f) => data.append('images', f));
-      } else {
-        data.append(key, val as string);
+
+    try {
+      // 1) Загрузка изображений: получаем ids
+      let imageIds: string[] = [];
+      if (form.images.length > 0) {
+        // Параллельно загружаем
+        const uploadPromises = form.images.map(async (file) => {
+          const dataUrl = await fileToDataURL(file);
+          // Вызываем uploadImageBase64 с { image: dataUrl }
+          const resp = await uploadImageBase64({ image: dataUrl }).unwrap();
+          return resp.id;
+        });
+        imageIds = await Promise.all(uploadPromises);
       }
-    });
-    await addPainting(data as any);
-    setForm(initialForm);
-    onClose();
+
+      // 2) Собираем payload
+      const payload: PaintingPostType = {
+        title: form.title,
+        description: form.description,
+        artist_id: form.artist, // в зависимости от того, как вы именуете поля в PaintingPostType
+        gallery_id: form.gallery,
+        category_id: form.category,
+        technique: form.technique,
+        dimensions: form.dimensions,
+        price: form.price,
+        status: 'available',
+        image_ids: imageIds, // соответствует сериализатору: image_ids
+      };
+
+      // 3) Создаём запись картины
+      await addPainting(payload).unwrap();
+      // 4) Сброс
+      setForm(initialForm);
+      onClose();
+    } catch (err) {
+      console.error('Ошибка при загрузке или создании:', err);
+      // Можно показывать уведомление
+    }
   };
 
   if (!isOpen) return null;
@@ -90,9 +132,8 @@ export const AddPaintingModal: React.FC<{ isOpen: boolean; onClose: () => void }
           &times;
         </Button>
         <Text view="title">Добавить картину</Text>
-        <form className={styles.form} onSubmit={handleSubmit} encType="multipart/form-data" noValidate>
+        <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <div className={styles.grid}>
-            {/** Required fields */}
             {[
               { label: 'Заголовок', name: 'title', type: 'text' },
               { label: 'Техника', name: 'technique', type: 'text' },
@@ -110,10 +151,11 @@ export const AddPaintingModal: React.FC<{ isOpen: boolean; onClose: () => void }
                 />
               </div>
             ))}
+
             <div className={styles.field}>
               <Text view="p-18">Артист</Text>
               <select name="artist" value={form.artist} onChange={handleChange} required>
-                {ARTISTS.map((a) => (
+                {artistsData?.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name}
                   </option>
@@ -123,7 +165,7 @@ export const AddPaintingModal: React.FC<{ isOpen: boolean; onClose: () => void }
             <div className={styles.field}>
               <Text view="p-18">Галерея</Text>
               <select name="gallery" value={form.gallery} onChange={handleChange} required>
-                {GALLERIES.map((g) => (
+                {galleryData?.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
                   </option>
@@ -133,32 +175,32 @@ export const AddPaintingModal: React.FC<{ isOpen: boolean; onClose: () => void }
             <div className={styles.field}>
               <Text view="p-18">Категория</Text>
               <select name="category" value={form.category} onChange={handleChange} required>
-                {CATEGORIES.map((c) => (
+                {categoriesData?.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
                 ))}
               </select>
             </div>
-            <div className={styles.field}>
-              <Text view="p-18">Статус</Text>
-              <select name="status" value={form.status} onChange={handleChange} required>
-                {STATUSES.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+
             <div className={styles.field}>
               <Text view="p-18">Описание</Text>
               <textarea name="description" value={form.description} onChange={handleChange} required />
             </div>
+
             <div className={styles.field}>
               <Text view="p-18">Изображения</Text>
-              <input type="file" name="images" multiple accept="image/*" onChange={handleChange} required />
+              <input
+                type="file"
+                name="images"
+                multiple
+                accept="image/*"
+                onChange={handleChange}
+                required={form.images.length === 0}
+              />
             </div>
           </div>
+
           {previews.length > 0 && (
             <div className={styles.previewGrid}>
               {previews.map((src, idx) => (
@@ -166,8 +208,9 @@ export const AddPaintingModal: React.FC<{ isOpen: boolean; onClose: () => void }
               ))}
             </div>
           )}
-          <Button type="submit" disabled={isLoading} className={styles.submitBtn}>
-            {isLoading ? 'Сохранение...' : 'Добавить'}
+
+          <Button type="submit" className={styles.submitBtn}>
+            Добавить
           </Button>
         </form>
       </div>

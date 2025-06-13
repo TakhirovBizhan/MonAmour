@@ -5,6 +5,7 @@ from store.views import (
     ArtistViewSet,
     GalleryViewSet,
     CategoryViewSet,
+    PaintingImageViewSet,
     PaintingViewSet,
     BannerViewSet,
     UserViewSet
@@ -12,6 +13,7 @@ from store.views import (
 from orders.views import CartViewSet, OrderViewSet, OrderItemViewSet
 
 router = DefaultRouter()
+router.register(r'painting-images', PaintingImageViewSet, basename='paintingimage')
 router.register(r'artists', ArtistViewSet, basename='artist')
 router.register(r'galleries', GalleryViewSet, basename='gallery')
 router.register(r'categories', CategoryViewSet, basename='category')
