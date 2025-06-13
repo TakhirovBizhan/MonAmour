@@ -2,6 +2,8 @@
 from rest_framework import serializers
 from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage
 from django.contrib.auth import get_user_model
+from drf_extra_fields.fields import Base64ImageField
+
 
 class ArtistSerializer(serializers.ModelSerializer):
     resume = serializers.FileField(required=False)
@@ -93,4 +95,11 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        read_only_fields = ['id']
+
+class PaintingImageUploadSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+    class Meta:
+        model = PaintingImage
+        fields = ['id', 'image']
         read_only_fields = ['id']

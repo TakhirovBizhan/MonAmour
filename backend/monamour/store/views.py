@@ -4,16 +4,19 @@ from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, filters
 from django.utils import timezone
 from django.db import models
-from .models import Artist, Gallery, Category, Painting, Banner
+from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage
 from rest_framework.permissions import AllowAny
+from rest_framework import viewsets, mixins
 
 from .serializers import (
     ArtistSerializer,
     GallerySerializer,
     CategorySerializer,
+    PaintingImageSerializer,
     PaintingSerializer,
     BannerSerializer,
-    UserSerializer
+    UserSerializer,
+    PaintingImageUploadSerializer
 )
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -144,3 +147,20 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+
+class PaintingImageViewSet(mixins.CreateModelMixin,
+                           mixins.RetrieveModelMixin,
+                           mixins.ListModelMixin,
+                           viewsets.GenericViewSet):
+    """
+    ViewSet для PaintingImage. 
+    - POST: загрузка нового изображения (без привязки к painting) через base64.
+    - GET (list): можно просматривать ранее загруженные (непривязанные или все, по фильтру?).
+    - GET (retrieve): получить данные одного изображения, включая image_url.
+    """
+    queryset = PaintingImage.objects.all()
+    
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return PaintingImageUploadSerializer
+        return PaintingImageSerializer
