@@ -61,7 +61,7 @@ export const productsApi = api.injectEndpoints({
 
         redactPainting: builder.mutation<void, PaintingPostType>({
             query: (regData) => ({
-                url: `/paintings/${regData.id}`,
+                url: `/paintings/${regData.id}/`,
                 method: "PUT",
                 body: regData,
             }),
