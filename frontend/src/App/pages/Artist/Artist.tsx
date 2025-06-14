@@ -15,6 +15,11 @@ export const Artist = () => {
       <div className={s.text_block}>
         <Text view="title">{data?.name}</Text>
         <Text view="p-18">{data?.biography}</Text>
+        {data?.average_rating && (
+          <Text view="p-16" color="accent">
+            Рейтинг: {data?.average_rating} ⭐
+          </Text>
+        )}
       </div>
     </div>
   );

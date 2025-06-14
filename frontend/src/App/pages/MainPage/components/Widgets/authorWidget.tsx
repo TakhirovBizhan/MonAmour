@@ -21,6 +21,13 @@ export const AuthorWidget = () => {
               <Card
                 image={Artist.image}
                 className={s.category_card}
+                captionSlot={
+                  Artist?.average_rating && (
+                    <Text view="p-16" color="accent">
+                      Рейтинг: {Artist?.average_rating} ⭐
+                    </Text>
+                  )
+                }
                 title={Artist.name}
                 actionSlot={
                   <Button className={s.action_btn}>

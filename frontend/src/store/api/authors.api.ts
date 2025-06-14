@@ -6,7 +6,9 @@ export type artistResponce = {
     "image": string,
     "biography": string,
     "resume": null,
-    "website": null
+    "website": null,
+    "average_rating": 4.0 | null,
+    "reviews_count": number
 };
 
 export const CartApi = api.injectEndpoints({
