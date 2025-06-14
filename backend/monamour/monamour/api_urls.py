@@ -8,7 +8,8 @@ from store.views import (
     PaintingImageViewSet,
     PaintingViewSet,
     BannerViewSet,
-    UserViewSet
+    UserViewSet,
+    ArtistReviewViewSet,  # добавляем импорт
 )
 from orders.views import CartViewSet, OrderViewSet, OrderItemViewSet
 
@@ -19,6 +20,9 @@ router.register(r'galleries', GalleryViewSet, basename='gallery')
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'paintings', PaintingViewSet, basename='painting')
 router.register(r'banners', BannerViewSet, basename='banner')
+
+# Добавляем маршрут для отзывов об авторах:
+router.register(r'artist-reviews', ArtistReviewViewSet, basename='artistreview')
 
 router.register(r'carts', CartViewSet, basename='cart')
 router.register(r'orders', OrderViewSet, basename='order')

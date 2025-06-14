@@ -3,6 +3,7 @@ from decimal import Decimal
 import uuid
 from django.db import models
 
+from django.conf import settings
 
 class PaintingQuerySet(models.QuerySet):
     def expensive(self, threshold: Decimal):
@@ -157,3 +158,44 @@ class Banner(models.Model):
     class Meta:
         verbose_name = 'Рекламный баннер'
         verbose_name_plural = 'Рекламные баннеры'
+    
+
+class ArtistReview(models.Model):
+    """
+    Отзывы и рейтинги для художников (Artist).
+    Один пользователь может оставить только один отзыв для конкретного художника.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    artist = models.ForeignKey(
+        Artist,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Художник'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='artist_reviews',
+        verbose_name='Пользователь'
+    )
+    rating = models.PositiveSmallIntegerField(
+        verbose_name='Оценка',
+        # Ограничим 1–5:
+        choices=[(i, str(i)) for i in range(1, 6)]
+    )
+    comment = models.TextField(
+        verbose_name='Комментарий',
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    class Meta:
+        verbose_name = 'Отзыв об авторе'
+        verbose_name_plural = 'Отзывы об авторах'
+        # Ограничение: один отзыв пользователя на одного художника
+        # unique_together = ('artist', 'user')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Отзыв пользователя {self.user} об авторе {self.artist} ({self.rating})"

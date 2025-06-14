@@ -1,13 +1,17 @@
 # store/views.py
-from django.db.models import Count
-from rest_framework import viewsets
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet, filters
-from django.utils import timezone
-from django.db import models
-from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage
-from rest_framework.permissions import AllowAny
-from rest_framework import viewsets, mixins
 
+from django.db.models import Count, Avg, Q
+from django.utils import timezone
+from rest_framework import viewsets, mixins, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, filters
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.pagination import LimitOffsetPagination
+
+from django.contrib.auth import get_user_model
+
+from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage, ArtistReview
 from .serializers import (
     ArtistSerializer,
     GallerySerializer,
@@ -16,102 +20,156 @@ from .serializers import (
     PaintingSerializer,
     BannerSerializer,
     UserSerializer,
-    PaintingImageUploadSerializer
+    PaintingImageUploadSerializer,
+    ArtistReviewSerializer
 )
-from django.contrib.auth import get_user_model
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from django_filters import rest_framework as df_filters
-UUIDFilter = df_filters.UUIDFilter
-from rest_framework.pagination import LimitOffsetPagination
 
-from rest_framework.decorators import action
-from rest_framework.response import Response
+UUIDFilter = filters.UUIDFilter
+User = get_user_model()
 
 
+# Фильтры
 
 class PaintingFilter(FilterSet):
     status = filters.CharFilter(field_name='status', lookup_expr='iexact')
-    title = filters.CharFilter(field_name='title', lookup_expr='icontains')        
+    title = filters.CharFilter(field_name='title', lookup_expr='icontains')
     min_price = filters.NumberFilter(field_name='price', lookup_expr='gte')
     max_price = filters.NumberFilter(field_name='price', lookup_expr='lte')
-    category = filters.UUIDFilter(field_name='category', lookup_expr='exact')         
-    gallery = filters.UUIDFilter(field_name='gallery', lookup_expr='exact')            
+    category = filters.UUIDFilter(field_name='category', lookup_expr='exact')
+    gallery = filters.UUIDFilter(field_name='gallery', lookup_expr='exact')
     added_before = filters.DateTimeFilter(field_name='added_at', lookup_expr='lte')
     added_after = filters.DateTimeFilter(field_name='added_at', lookup_expr='gte')
 
     class Meta:
-        model  = Painting
+        model = Painting
         fields = [
             'status', 'title', 'category', 'gallery',
             'min_price', 'max_price', 'added_before', 'added_after'
         ]
 
-class PaintingPagination(LimitOffsetPagination):
-    max_limit = 100        # но нельзя запросить больше 100
-    offset_query_param = 'offset'
-    limit_query_param = 'limit'
 
 class ArtistFilter(FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='contains')
+
     class Meta:
         model = Artist
         fields = ['name']
-        
-        
+
+
+# Pagination
+
+class PaintingPagination(LimitOffsetPagination):
+    max_limit = 100
+    offset_query_param = 'offset'
+    limit_query_param = 'limit'
+
+
+# Permission for review owner or staff
+
+class IsReviewOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Разрешает редактировать/удалять отзыв только его владельцу или staff.
+    """
+    def has_object_permission(self, request, view, obj):
+        # SAFE_METHODS разрешены всем
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        # Только владелец отзыва или staff может изменять/удалять
+        return obj.user == request.user or request.user.is_staff
+
+
+# ViewSets
+
 class ArtistViewSet(viewsets.ModelViewSet):
-    queryset = Artist.objects.all()
+    """
+    CRUD для артистов. Дополнительно аннотация среднего рейтинга и числа отзывов,
+    а также action для получения отзывов конкретного автора.
+    """
+    queryset = Artist.objects.all().annotate(
+        average_rating=Avg('reviews__rating'),
+        reviews_count=Count('reviews')
+    )
     serializer_class = ArtistSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
     filterset_class = ArtistFilter
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        # Переопределяем, чтобы гарантировать аннотацию в любых условиях
+        qs = Artist.objects.all().annotate(
+            average_rating=Avg('reviews__rating'),
+            reviews_count=Count('reviews')
+        )
+        return qs
+
+    @action(detail=True, methods=['get'], url_path='reviews')
+    def reviews(self, request, pk=None):
+        """
+        GET /api/artists/{id}/reviews/
+        Возвращает отзывы для данного автора, с пагинацией.
+        """
+        artist = self.get_object()
+        reviews_qs = ArtistReview.objects.filter(artist=artist).order_by('-created_at')
+        page = self.paginate_queryset(reviews_qs)
+        if page is not None:
+            serializer = ArtistReviewSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = ArtistReviewSerializer(reviews_qs, many=True, context={'request': request})
+        return Response(serializer.data)
+
 
 class GalleryViewSet(viewsets.ModelViewSet):
+    """
+    CRUD для галерей.
+    """
     queryset = Gallery.objects.all()
     serializer_class = GallerySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
-    
+
     @action(detail=False, methods=['get'], url_path='id-name')
     def id_name_list(self, request):
         """
-        Дополнительный экшен, который возвращает только пары {id, name} для всех галерей.
-        Доступно по адресу: GET /api/galleries/id-name/
+        GET /api/galleries/id-name/
+        Возвращает только пары {id, name} для всех галерей.
         """
-        # .values('id', 'name') вернёт список словарей вида [{'id': ..., 'name': '...'}, ...]
         data = Gallery.objects.values('id', 'name')
         return Response(data)
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
+    """
+    CRUD для категорий. Аннотация: количество картин и средняя цена.
+    """
     serializer_class = CategorySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
 
     def get_queryset(self):
-        # 1) Количество картин в каждой категории
-        # 2) Средняя цена картин в категории
         from django.db.models import Count, Avg
         return Category.objects.annotate(
             num_paintings=Count('painting'),
             avg_price=Avg('painting__price')
         )
 
+
 class PaintingViewSet(viewsets.ModelViewSet):
+    """
+    CRUD для картин, с фильтрацией, сортировкой, аннотацией активных акций.
+    Поддерживает sparse fieldsets через ?fields=...
+    """
     serializer_class = PaintingSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PaintingFilter
     pagination_class = PaintingPagination
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
-        # пример использования собственного менеджера
-        qs = Painting.objects.in_stock() # .expensive(50000)
-        qs = qs.select_related( 'gallery').prefetch_related('images')
-
-        # lookup-выражения
+        qs = Painting.objects.in_stock().select_related('gallery').prefetch_related('images')
         params = self.request.query_params
         if params.get('min_price'):
             qs = qs.filter(price__gt=params['min_price'])
-
-        # сортировка
         sort = params.get('sort')
         if sort == 'price_desc':
             qs = qs.order_by('-price')
@@ -119,48 +177,90 @@ class PaintingViewSet(viewsets.ModelViewSet):
             qs = qs.order_by('price')
         else:
             qs = qs.order_by('-added_at')
-
-        # 3) Количество активных акций (аннотация с фильтром)
         now = timezone.now()
         qs = qs.annotate(
-            active_promotions_count= Count(
+            active_promotions_count=Count(
                 'promotions',
-                filter=models.Q(promotions__start__lte=now, promotions__end__gte=now)
+                filter=Q(promotions__start__lte=now, promotions__end__gte=now)
             )
         )
         return qs
 
+    def get_serializer_context(self):
+        """
+        Добавляем в context sparse fieldsets: читаем ?fields=field1,field2,...
+        Если не задано, context['fields'] будет None, и сериализатор вернёт все поля.
+        """
+        context = super().get_serializer_context()
+        request = self.request
+
+        fields_param = request.query_params.get('fields')
+        if fields_param:
+            context['fields'] = [f.strip() for f in fields_param.split(',') if f.strip()]
+        else:
+            context['fields'] = None
+
+        return context
+
+
 class BannerViewSet(viewsets.ModelViewSet):
+    """
+    CRUD для баннеров.
+    """
     queryset = Banner.objects.all()
     serializer_class = BannerSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['headline']
-
-
-User = get_user_model()
+    
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    Открытый CRUD для встроенной модели пользователей:
-    любой (анонимный или авторизованный) может читать, создавать, обновлять и удалять.
+    CRUD для пользователей. Разрешаем всем.
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+
 
 class PaintingImageViewSet(mixins.CreateModelMixin,
                            mixins.RetrieveModelMixin,
                            mixins.ListModelMixin,
                            viewsets.GenericViewSet):
     """
-    ViewSet для PaintingImage. 
-    - POST: загрузка нового изображения (без привязки к painting) через base64.
-    - GET (list): можно просматривать ранее загруженные (непривязанные или все, по фильтру?).
-    - GET (retrieve): получить данные одного изображения, включая image_url.
+    ViewSet для PaintingImage:
+      - POST: загрузка через base64
+      - GET list/retrieve: просмотр изображений
     """
     queryset = PaintingImage.objects.all()
-    
+
     def get_serializer_class(self):
         if self.action == 'create':
             return PaintingImageUploadSerializer
         return PaintingImageSerializer
+
+
+from rest_framework import viewsets, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import ArtistReview
+from .serializers import ArtistReviewSerializer
+
+class ArtistReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ArtistReviewSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ['artist', 'user', 'rating']
+
+    def get_queryset(self):
+        # Возвращаем все отзывы
+        return ArtistReview.objects.all().select_related('artist', 'user')
+
+    def perform_create(self, serializer):
+        # НЕ передаём user=self.request.user, чтобы сериализатор мог использовать user из validated_data (user_id для admin)
+        serializer.save()
+
+    def get_permissions(self):
+        if self.action in ('update', 'partial_update', 'destroy'):
+            return [permissions.IsAuthenticated(), IsReviewOwnerOrReadOnly()]
+        if self.action == 'create':
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
