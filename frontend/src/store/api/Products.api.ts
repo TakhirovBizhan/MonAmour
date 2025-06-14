@@ -59,6 +59,24 @@ export const productsApi = api.injectEndpoints({
             }),
         }),
 
+        redactPainting: builder.mutation<void, PaintingPostType>({
+            query: (regData) => ({
+                url: `/paintings/${regData.id}`,
+                method: "PUT",
+                body: regData,
+            }),
+        }),
+
+        deletePainting: builder.mutation<void, string>({
+            query: (regData) => ({
+                url: `/paintings/${regData}`,
+                method: "DELETE",
+                body: regData,
+            }),
+        }),
+
+
+
         // Новый endpoint для загрузки одного изображения в base64-формате:
         uploadImageBase64: builder.mutation<UploadedImageResponse, { image: string }>({
             query: ({ image }) => ({
@@ -71,4 +89,4 @@ export const productsApi = api.injectEndpoints({
     overrideExisting: false,
 });
 
-export const { useGetProductsQuery, useAddPaintingMutation, useUploadImageBase64Mutation } = productsApi;
+export const { useGetProductsQuery, useAddPaintingMutation, useUploadImageBase64Mutation, useRedactPaintingMutation, useDeletePaintingMutation } = productsApi;

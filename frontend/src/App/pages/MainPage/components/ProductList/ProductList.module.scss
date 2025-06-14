@@ -4,3 +4,37 @@
   justify-content: space-evenly;
   gap: 30px;
 }
+
+.redact {
+  background-color: rgb(0, 115, 198);
+  border-radius: 50px;
+  border: none;
+  padding: 3px 5px;
+}
+
+.redact:hover {
+  background-color: rgb(21, 149, 241);
+}
+
+.trash {
+  background-color: red;
+  border-radius: 50px;
+  border: none;
+  padding: 3px 5px;
+}
+
+.trash:hover {
+  background-color: rgb(255, 59, 59);
+}
+
+.button_block {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin_block {
+  display: flex;
+  margin-top: 10px;
+  justify-content: flex-end;
+  gap: 30px;
+}

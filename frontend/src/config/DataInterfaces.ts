@@ -33,6 +33,7 @@ export interface IPaintingData {
 }
 
 export interface PaintingPostType {
+  id?: string;
   title: string;
   description: string;
   artist_id: string;
