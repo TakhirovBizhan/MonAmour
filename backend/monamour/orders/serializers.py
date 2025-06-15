@@ -31,7 +31,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'user', 'order_date', 'total_amount', 'status', 'delivery_address', 'paintings', 'items']
+        fields = ['id', 'user', 'order_date', 'status', 'delivery_address', 'paintings', 'items']
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
@@ -42,7 +42,6 @@ class OrderSerializer(serializers.ModelSerializer):
             price = painting.price
             total += price
             OrderItem.objects.create(order=order, painting=painting, price_at_purchase=price)
-        order.total_amount = total
         order.save()
         return order
 

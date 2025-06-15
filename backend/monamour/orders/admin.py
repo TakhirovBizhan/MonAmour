@@ -67,7 +67,6 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 #         p.showPage()
 #         y = height - 50
 #     p.setFont("roboto", 12)
-#     p.drawString(50, y, f"Общая сумма товаров: {order.total_amount:.2f}")
 
 #     p.showPage()
 #     p.save()
@@ -87,7 +86,7 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model = Order
-        fields = ['user', 'total_amount', 'status', 'delivery_address', 'paintings']
+        fields = ['user',  'status', 'delivery_address', 'paintings']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -122,7 +121,7 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     form = OrderForm
-    list_display = ('id', 'user', 'order_date', 'total_amount', 'status')
+    list_display = ('id', 'user', 'order_date',  'status')
     list_filter = ('status', 'order_date')
     search_fields = ('user__username', 'id')
     date_hierarchy = 'order_date'

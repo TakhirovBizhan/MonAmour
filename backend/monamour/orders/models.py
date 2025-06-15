@@ -5,9 +5,9 @@ from store.models import Painting
 
 class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='carts')
-    painting = models.ForeignKey(Painting, on_delete=models.CASCADE)  
-    added_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='carts', verbose_name='Пользователь')
+    painting = models.ForeignKey(Painting, on_delete=models.CASCADE, verbose_name='Картина')  
+    added_at = models.DateTimeField(auto_now_add=True, verbose_name='Время добавления')
 
     def __str__(self):
         return f"Корзина {self.user}"
@@ -24,11 +24,10 @@ class Order(models.Model):
         ('delivered', 'Доставлен'),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
-    order_date = models.DateTimeField(auto_now_add=True)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='processing')
-    delivery_address = models.TextField()
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders', verbose_name='Пользователь')
+    order_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата заказа')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='processing', verbose_name='Статус')
+    delivery_address = models.TextField(verbose_name='Адрес доставки')
       # новое поле M2M через OrderItem:
     paintings = models.ManyToManyField(
         Painting,
@@ -47,9 +46,9 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    painting = models.ForeignKey(Painting, on_delete=models.CASCADE)
-    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='Заказ')
+    painting = models.ForeignKey(Painting, on_delete=models.CASCADE, verbose_name='Картина')
+    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
     purchased_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата/время покупки')
 
     def __str__(self):
