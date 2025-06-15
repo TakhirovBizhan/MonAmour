@@ -1,5 +1,5 @@
 # orders/views.py
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Cart, Order, OrderItem
 from .serializers import CartSerializer, OrderSerializer, OrderItemSerializer
@@ -27,19 +27,28 @@ class CartViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.select_related('user')
     serializer_class = OrderSerializer
+    # Разрешаем анонимный доступ, если вы принимаете user_id из payload:
+    permission_classes = [permissions.AllowAny]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['user']  # фильтрация по id пользователя
 
     def get_queryset(self):
         user = self.request.user
-        if self.request.user.is_staff:
-            return Order.objects.all().select_related('user')
-        # обычный пользователь видит только свои заказы
-        return Order.objects.filter(user=user).select_related('user')
+        if user and user.is_authenticated:
+            if user.is_staff:
+                return Order.objects.all().select_related('user')
+            # Обычный пользователь видит только свои заказы
+            return Order.objects.filter(user=user).select_related('user')
+        # Анонимы не видят заказы (если нужно иное поведение, скорректируйте)
+        return Order.objects.none()
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # Не передаём user=self.request.user, 
+        # потому что OrderSerializer ожидает user_id из payload и сам установит user
+        serializer.save()
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.select_related('order', 'painting')
     serializer_class = OrderItemSerializer
+    # Разрешения по необходимости, например:
+    permission_classes = [permissions.AllowAny]

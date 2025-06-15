@@ -1,7 +1,6 @@
 # store/serializers.py
 from rest_framework import serializers
 from .models import Artist, ArtistReview, Gallery, Category, Painting, Banner, PaintingImage
-from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
 from django.db.models import Avg, Count
 

@@ -1,4 +1,5 @@
-import React from 'react';
+// Cart.tsx
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import s from './Cart.module.scss';
 import Text from '../../../components/Text';
@@ -6,16 +7,12 @@ import Card from '../../../components/Card';
 import Button from '../../../components/Button';
 import Loader from '../../../components/Loader';
 import { useGetCartQuery, useDeleteMutation } from '../../../store/api/Cart.api';
+import OrderModal, { CartItem } from './Components/OrderModal/OrderModal';
 
 const Cart: React.FC = () => {
   const { data: cartData, isLoading, isError } = useGetCartQuery();
   const [removeFromCart] = useDeleteMutation();
-
-  const handleRemove = async (cartItemId: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    await removeFromCart(cartItemId);
-    // RTK Query invalidates tags and refetches getCart automatically
-  };
+  const [isOrderOpen, setIsOrderOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -35,21 +32,38 @@ const Cart: React.FC = () => {
     );
   }
 
+  const handleRemove = async (cartItemId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      await removeFromCart(cartItemId).unwrap();
+    } catch (err) {
+      console.error('Ошибка при удалении из корзины', err);
+    }
+  };
+
+  const openOrderModal = () => setIsOrderOpen(true);
+  const closeOrderModal = () => setIsOrderOpen(false);
+
+  const paintings: CartItem[] = cartData?.map((item) => ({ cartItemId: item.id, painting: item.painting })) || [];
+
   return (
     <div className={s.wrapper}>
       <Text view="title">Ваша корзина</Text>
+      <Button onClick={openOrderModal} disabled={!paintings.length} className={s.orderButton}>
+        Оформить заказ
+      </Button>
       <div className={s.cart_list}>
-        {cartData && cartData.length > 0 ? (
-          cartData.map((item) => (
-            <Link key={item.id} to={`/main/paintings/${item.painting.id}`} className={s.link}>
+        {paintings.length > 0 ? (
+          paintings.map((item) => (
+            <Link key={item.cartItemId} to={`/main/paintings/${item.painting.id}`} className={s.link}>
               <Card
-                image={item.painting.images[0].image_url}
+                image={item.painting.images[0]?.image_url}
                 captionSlot={item.painting.category.name}
                 title={item.painting.title}
                 subtitle={item.painting.dimensions}
-                contentSlot={`${item.painting.price} p`}
+                contentSlot={`${item.painting.price} р`}
                 actionSlot={
-                  <Button onClick={(e) => handleRemove(item.id, e)}>
+                  <Button onClick={(e) => handleRemove(item.cartItemId, e)}>
                     <Text view="button">Удалить из корзины</Text>
                   </Button>
                 }
@@ -60,6 +74,14 @@ const Cart: React.FC = () => {
           <Text view="p-18">Ваша корзина пуста</Text>
         )}
       </div>
+      {isOrderOpen && (
+        <OrderModal
+          isOpen={isOrderOpen}
+          onClose={closeOrderModal}
+          cartItems={paintings}
+          removeFromCart={removeFromCart}
+        />
+      )}
     </div>
   );
 };
