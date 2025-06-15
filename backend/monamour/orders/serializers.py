@@ -9,10 +9,11 @@ class CartSerializer(serializers.ModelSerializer):
         queryset=PaintingSerializer.Meta.model.objects.all(),
         source='painting', write_only=True
     )
+    painting_add_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'painting', 'painting_id', 'added_at']
+        fields = ['id', 'user', 'painting', 'painting_id', 'added_at', 'painting_add_count']
 
 class OrderItemSerializer(serializers.ModelSerializer):
     painting = PaintingSerializer(read_only=True)

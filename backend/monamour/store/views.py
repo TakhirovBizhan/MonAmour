@@ -12,6 +12,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from django.contrib.auth import get_user_model
 
 from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage, ArtistReview
+from orders.models import Cart
 from .serializers import (
     ArtistSerializer,
     GallerySerializer,
@@ -184,6 +185,13 @@ class PaintingViewSet(viewsets.ModelViewSet):
                 filter=Q(promotions__start__lte=now, promotions__end__gte=now)
             )
         )
+        
+                # Добавляем аннотацию: сколько раз картина была добавлена в корзину
+        # Если FK Cart.painting без related_name, то default related_name 'cart_set'
+        qs = qs.annotate(
+            times_added_to_cart=Count('cart')
+        )
+
         return qs
 
     def get_serializer_context(self):

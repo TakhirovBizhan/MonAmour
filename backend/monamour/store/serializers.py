@@ -5,7 +5,10 @@ from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
 from django.db.models import Avg, Count
 
-User = get_user_model()
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from .models import Artist, ArtistReview
+from django.utils.translation import gettext_lazy as _
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -42,12 +45,6 @@ class ArtistSerializer(serializers.ModelSerializer):
         # Аналогично: можно использовать аннотацию, или считать:
         cnt = obj.reviews.aggregate(count=Count('id')).get('count', 0)
         return cnt
-
-from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import Artist, ArtistReview
-from .serializers import ArtistSerializer  # или скорректированный импорт
-from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
 
@@ -189,6 +186,8 @@ class PaintingSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer(read_only=True)
     gallery = GallerySerializer(read_only=True)
     category = CategorySerializer(read_only=True)
+    times_added_to_cart = serializers.IntegerField(read_only=True)
+    
     # write-only PK fields
     artist_id = serializers.PrimaryKeyRelatedField(
         source='artist', queryset=Artist.objects.all(), write_only=True
@@ -217,7 +216,8 @@ class PaintingSerializer(serializers.ModelSerializer):
             'category', 'category_id',
             'technique', 'dimensions', 'price',
             'discounted_price', 'status', 'added_at',
-            'images', 'image_ids'
+            'images', 'image_ids',
+            'times_added_to_cart'
         ]
 
     def __init__(self, *args, **kwargs):
