@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { AboutUs, Cart, Categories, MainPage, ProductPage, AuthPage, Profile } from './pages';
+import { AboutUs, Cart, Categories, MainPage, ProductPage, AuthPage, Profile, Order } from './pages';
 import { ROUTES } from '../config/routes';
 import { ThemeProvider } from '../hooks/useThemes/themeProvider';
 import ProtectedLayout from './AppLayout';
@@ -12,7 +12,7 @@ function App() {
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<AuthPage />} />
+            <Route path={ROUTES.login} element={<AuthPage />} />
 
             <Route path="/" element={<ProtectedLayout />}>
               <Route path={ROUTES.root} element={<MainPage />} />
@@ -24,6 +24,7 @@ function App() {
               <Route path={ROUTES.profile} element={<Profile />} />
               <Route path={ROUTES.cart} element={<Cart />} />
               <Route path={ROUTES.artist} element={<Artist />} />
+              <Route path={ROUTES.order} element={<Order />} />
               <Route path="*" element={<Navigate to={ROUTES.root} replace />} />
               <Route path="/" element={<Navigate to={ROUTES.root} replace />} />
             </Route>

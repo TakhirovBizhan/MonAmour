@@ -5,6 +5,51 @@ export interface Artist {
   biography: string;
 }
 
+export type PostOrder = {
+  "user_id": string,
+  "status": string,
+  "street": string,
+  "house_number": string,
+  "city": string,
+  "postal_code": string,
+  "address_comment"?: string,
+  "painting_ids": string[]
+}
+
+export type OrderResponse = {
+  id: string
+  "user": string,
+  "status": string,
+  "street": string,
+  "house_number": number,
+  "city": string,
+  "postal_code": number,
+  "address_comment"?: string,
+  "payment_method": "card" | 'cash',
+  "phone_number": string,
+  "items": orderItem[],
+  order_date: string
+}
+
+export type orderItem = {
+  "id": string,
+  "order": string,
+  "painting": Painting,
+  "price_at_purchase": number,
+  "purchased_at": string
+}
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;       // может быть пусто
+  role?: string;        // может быть пусто или 'buyer'/'admin'
+  date_joined: string;  // ISO-строка
+}
+
 export interface Gallery {
   id: string;
   name: string;

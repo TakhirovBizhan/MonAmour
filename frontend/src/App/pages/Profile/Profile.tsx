@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import Loader from '../../../components/Loader';
 import Text from '../../../components/Text';
-import { useGetProfileQuery } from '../../../store/api/Auth.api';
 import s from './Profile.module.scss';
 import Redact from './components/redact';
 import Button from '../../../components/Button';
+import { useGetMeQuery } from '../../../store/api/Auth.api';
 
 const Profile = () => {
-  const user_id = localStorage.getItem('currentUser');
-  const { data: profileData, isLoading: loading } = useGetProfileQuery(user_id!);
+  const { data: profileData, isLoading: loading } = useGetMeQuery();
   const [isModalOpen, setModalOpen] = useState(false);
 
   function logout(): void {

@@ -1,11 +1,6 @@
 // store/api/Auth.api.ts
-import {
-    userRegType,
-    userRegResponce,
-    userLogType,
-    userLogResponce,
-} from '../../config/DataInterfaces';
-import { api } from './api';
+import { api } from "./api";
+import { User } from "../../config/DataInterfaces";
 
 type updateUserType = {
     id: string;
@@ -15,35 +10,41 @@ type updateUserType = {
     last_name: string;
 };
 
+
+interface RegisterRequest {
+    username: string;
+    email: string;
+    password: string;
+    password2: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    // role не передаем при обычной регистрации, сервер сам поставит 'buyer'
+}
+interface RegisterResponse {
+    id: string;
+    username: string;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    role?: string;
+    date_joined: string;
+}
+interface TokenResponse {
+    access: string;
+    refresh: string;
+    user: User; // потому что MyTokenObtainPairSerializer возвращает user
+}
+interface LoginRequest {
+    username: string;
+    password: string;
+}
+
 export const AuthApi = api.injectEndpoints({
     endpoints: (builder) => ({
-        register: builder.mutation<userRegResponce, userRegType>({
-            query: (regData) => ({
-                url: '/users',
-                method: 'POST',
-                body: regData,
-            }),
-        }),
 
-        login: builder.mutation<userLogResponce, userLogType>({
-            query: (logData) => ({
-                url: '/auth/login',
-                method: 'POST',
-                body: logData,
-            }),
-        }),
-
-        getProfile: builder.query<userRegResponce, string>({
-            query: (userId) => ({
-                url: `/users/${userId}/`,
-                method: 'GET',
-            }),
-            providesTags: (result, error, userId) => [
-                { type: 'User', id: userId },
-            ],
-        }),
-
-        updateUser: builder.mutation<userRegResponce, updateUserType>({
+        updateUser: builder.mutation<RegisterResponse, updateUserType>({
             query: (data) => ({
                 url: `/users/${data.id}/`,
                 method: 'PUT',
@@ -53,6 +54,36 @@ export const AuthApi = api.injectEndpoints({
                 { type: 'User', id },
             ],
         }),
+
+        register: builder.mutation<RegisterResponse, RegisterRequest>({
+            query: (regData) => ({
+                url: "/auth/register/",
+                method: "POST",
+                body: regData,
+            }),
+        }),
+        login: builder.mutation<TokenResponse, LoginRequest>({
+            query: (logData) => ({
+                url: "/auth/token/",
+                method: "POST",
+                body: logData,
+            }),
+        }),
+        refreshToken: builder.mutation<{ access: string; refresh: string }, { refresh: string }>({
+            query: ({ refresh }) => ({
+                url: "/auth/token/refresh/",
+                method: "POST",
+                body: { refresh },
+            }),
+        }),
+        getMe: builder.query<User, void>({
+            query: () => ({
+                url: "/auth/me/",
+                method: "GET",
+            }),
+            providesTags: (result) =>
+                result ? [{ type: "User" as const, id: result.id }] : [{ type: "User" as const, id: "LIST" }],
+        }),
     }),
     overrideExisting: false,
 });
@@ -60,6 +91,7 @@ export const AuthApi = api.injectEndpoints({
 export const {
     useRegisterMutation,
     useLoginMutation,
-    useGetProfileQuery,
-    useUpdateUserMutation,  // ← обратите внимание, что хук называется по-новому
+    useRefreshTokenMutation,
+    useGetMeQuery,
+    useUpdateUserMutation
 } = AuthApi;

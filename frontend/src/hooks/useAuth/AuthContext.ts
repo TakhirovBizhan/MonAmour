@@ -1,17 +1,16 @@
-import { createContext, useContext } from "react";
+// hooks/useAuth/AuthContext.tsx
+import React from "react";
 
-interface AuthContextType {
+export interface AuthContextType {
     isAuthenticated: boolean;
-    login: (token: string) => void;
+    user: any | null;
+    login: (accessToken: string, refreshToken: string, userData: any) => void;
     logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType | null>(null);
-
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
-};
+export const AuthContext = React.createContext<AuthContextType>({
+    isAuthenticated: false,
+    user: null,
+    login: () => { },
+    logout: () => { },
+});

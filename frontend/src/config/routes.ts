@@ -6,6 +6,8 @@ export const ROUTES = {
   category: 'category/:id',
   cart: 'cart',
   auth: 'auth',
+  login: 'login',
   profile: 'profile',
-  artist: 'artist/:id'
+  artist: 'artist/:id',
+  order: 'order/:id'
 };

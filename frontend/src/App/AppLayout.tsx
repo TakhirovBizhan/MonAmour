@@ -1,5 +1,5 @@
 import { Outlet, Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth/AuthContext';
+import { useAuth } from '../hooks/useAuth/useAuth';
 import Header from '../components/Header';
 
 const ProtectedLayout = () => {

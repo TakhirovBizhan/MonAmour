@@ -46,15 +46,19 @@ INSTALLED_APPS = [
     'orders',
     'rest_framework',
     'corsheaders',
+    
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 REST_FRAMEWORK = {
-    
-    'DEFAULT_PERMISSION_CLASSES': [
-        # По умолчанию должен быть AllowAny:
-        'rest_framework.permissions.AllowAny',
-    ],
-    
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # опционно, если нужна сессия
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+    # Остальные настройки...
     
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
@@ -162,3 +166,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,  # если используете token_blacklist
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    # Дополнительные опции при необходимости...
+}

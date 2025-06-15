@@ -274,11 +274,16 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
-        read_only_fields = ['id']
-
+        # 'id' уже помечен как read_only_fields, что корректно.
+        # Для безопасности, если вы не хотите, чтобы пользователи могли менять свой username или email
+        # без специального процесса (например, подтверждения через почту),
+        # вы можете добавить 'username' и 'email' в read_only_fields.
+        # Однако, если вы позволяете пользователям менять их, то оставьте как есть.
+        read_only_fields = ['id', 'is_staff', 'is_active', 'date_joined', 'last_login', 'groups', 'user_permissions'] # Добавлены стандартные read-only поля для User
+        
 class PaintingImageUploadSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     class Meta:
         model = PaintingImage
         fields = ['id', 'image']
-        read_only_fields = ['id']
+        read_only_fields = ['id'] 
