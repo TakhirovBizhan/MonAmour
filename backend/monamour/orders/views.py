@@ -25,8 +25,20 @@ class CartViewSet(viewsets.ModelViewSet):
         return qs
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.select_related('user').prefetch_related('items__painting')
+    queryset = Order.objects.select_related('user')
     serializer_class = OrderSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ['user']  # фильтрация по id пользователя
+
+    def get_queryset(self):
+        user = self.request.user
+        if self.request.user.is_staff:
+            return Order.objects.all().select_related('user')
+        # обычный пользователь видит только свои заказы
+        return Order.objects.filter(user=user).select_related('user')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.select_related('order', 'painting')

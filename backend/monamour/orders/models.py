@@ -23,13 +23,16 @@ class Order(models.Model):
         ('shipped', 'Отправлен'),
         ('delivered', 'Доставлен'),
     ]
+    PAYMENT_METHOD_CHOICES = [
+        ('card', 'Картой'),
+        ('cash', 'Наличными'),
+    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='orders',
-        verbose_name='Пользователь',
-        default=''
+        verbose_name='Пользователь'
     )
     order_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата заказа')
     status = models.CharField(
@@ -38,33 +41,25 @@ class Order(models.Model):
         default='processing',
         verbose_name='Статус'
     )
-    # Новые поля для адреса доставки:
-    street = models.CharField(
-        max_length=255,
-        verbose_name='Улица',
-        default=''
+    # Адрес доставки поля
+    street = models.CharField(max_length=255, verbose_name='Улица', default='')
+    house_number = models.CharField(max_length=20, verbose_name='Номер дома', default='')
+    city = models.CharField(max_length=100, verbose_name='Город', default='')
+    postal_code = models.CharField(max_length=20, verbose_name='Почтовый индекс', default='')
+    address_comment = models.TextField(blank=True, null=True, verbose_name='Комментарий к адресу')
+    # Новые поля: способ оплаты и контактный телефон
+    payment_method = models.CharField(
+        max_length=10,
+        choices=PAYMENT_METHOD_CHOICES,
+        default='card',
+        verbose_name='Способ оплаты'
     )
-    house_number = models.CharField(
+    phone_number = models.CharField(
         max_length=20,
-        verbose_name='Номер дома',
-        default=''
+        verbose_name='Номер телефона',
+        default='',
+        help_text='Контактный номер телефона клиента'
     )
-    city = models.CharField(
-        max_length=100,
-        verbose_name='Город',
-        default=''
-    )
-    postal_code = models.CharField(
-        max_length=20,
-        verbose_name='Почтовый индекс',
-        default=''
-    )
-    address_comment = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name='Комментарий к адресу'
-    )
-    # ManyToMany через OrderItem:
     paintings = models.ManyToManyField(
         Painting,
         through='OrderItem',
@@ -79,6 +74,7 @@ class Order(models.Model):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
         ordering = ['-order_date', 'user']
+
 
 class OrderItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
