@@ -24,11 +24,47 @@ class Order(models.Model):
         ('delivered', 'Доставлен'),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders', verbose_name='Пользователь')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='orders',
+        verbose_name='Пользователь',
+        default=''
+    )
     order_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата заказа')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='processing', verbose_name='Статус')
-    delivery_address = models.TextField(verbose_name='Адрес доставки')
-      # новое поле M2M через OrderItem:
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='processing',
+        verbose_name='Статус'
+    )
+    # Новые поля для адреса доставки:
+    street = models.CharField(
+        max_length=255,
+        verbose_name='Улица',
+        default=''
+    )
+    house_number = models.CharField(
+        max_length=20,
+        verbose_name='Номер дома',
+        default=''
+    )
+    city = models.CharField(
+        max_length=100,
+        verbose_name='Город',
+        default=''
+    )
+    postal_code = models.CharField(
+        max_length=20,
+        verbose_name='Почтовый индекс',
+        default=''
+    )
+    address_comment = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Комментарий к адресу'
+    )
+    # ManyToMany через OrderItem:
     paintings = models.ManyToManyField(
         Painting,
         through='OrderItem',
@@ -38,10 +74,10 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Заказ {self.id}, {self.user}"
-    
+
     class Meta:
         verbose_name = 'Заказ'
-        verbose_name_plural = 'Заказ'
+        verbose_name_plural = 'Заказы'
         ordering = ['-order_date', 'user']
 
 class OrderItem(models.Model):
