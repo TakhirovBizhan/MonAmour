@@ -1,5 +1,15 @@
 import { api } from "./api";
 
+export type artistReviewResponce = {
+    "id": string,
+    "artist": artistResponce,
+    "user": string,
+    "rating": number,
+    "comment": string,
+    "created_at": string,
+    "updated_at": string
+}
+
 export type artistResponce = {
     "id": string,
     "name": string,
@@ -27,10 +37,18 @@ export const CartApi = api.injectEndpoints({
                 method: "GET",
             }),
         }),
+
+        getReviewsByArtist: builder.query<artistReviewResponce[], string>({
+            query: (id) => ({
+                url: `/artist-reviews/?artist=${id}`,
+                method: "GET",
+            }),
+        }),
     }),
 });
 
 export const {
     useGetArtistsQuery,
-    useGetArtistQuery
+    useGetArtistQuery,
+    useGetReviewsByArtistQuery
 } = CartApi;
