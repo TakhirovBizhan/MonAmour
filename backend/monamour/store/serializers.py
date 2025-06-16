@@ -271,16 +271,33 @@ class BannerSerializer(serializers.ModelSerializer):
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для модели CustomUser.
+    Позволяет редактировать только свои основные поля (username, email, first_name, last_name, phone).
+    Поле role — read-only (менять только админ).
+    """
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
-        # 'id' уже помечен как read_only_fields, что корректно.
-        # Для безопасности, если вы не хотите, чтобы пользователи могли менять свой username или email
-        # без специального процесса (например, подтверждения через почту),
-        # вы можете добавить 'username' и 'email' в read_only_fields.
-        # Однако, если вы позволяете пользователям менять их, то оставьте как есть.
-        read_only_fields = ['id', 'is_staff', 'is_active', 'date_joined', 'last_login', 'groups', 'user_permissions'] # Добавлены стандартные read-only поля для User
-        
+        fields = [
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'phone',
+            'role',
+            'date_joined',
+        ]
+        read_only_fields = [
+            'id',
+            'role',
+            'date_joined',
+            'is_staff',
+            'is_active',
+            'last_login',
+            'groups',
+            'user_permissions',
+        ]
 class PaintingImageUploadSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     class Meta:

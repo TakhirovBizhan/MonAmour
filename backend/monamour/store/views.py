@@ -244,24 +244,57 @@ class BannerViewSet(viewsets.ModelViewSet):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             return [IsAdminUser()]
         return [AllowAny()]
-    
+
+class IsOwnerOrAdmin(permissions.BasePermission):
+    """
+    Разрешает доступ, если пользователь — владелец объекта (User) или is_staff.
+    """
+    def has_object_permission(self, request, view, obj):
+        # obj здесь экземпляр User
+        return bool(request.user and (request.user.is_staff or obj == request.user))    
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    CRUD для пользователей.
+    ViewSet для CustomUser.
+    - list: только админ может получить список.
+    - retrieve: владелец или админ.
+    - update/partial_update: владелец или админ.
+    - destroy: владелец или админ (или можно запретить удалять себя).
+    - create: только админ (или отключить).
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # Изменено: Только администраторы могут просматривать, создавать, обновлять и удалять пользователей.
-    # Пользователи могут просматривать свой собственный профиль.
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ['username', 'email']
+
     def get_permissions(self):
-        if self.action in ('list', 'retrieve', 'create', 'update', 'partial_update', 'destroy'):
-            # Разрешаем просмотр своего профиля аутентифицированному пользователю,
-            # но только админы могут просматривать и управлять всеми пользователями.
-            if self.action == 'retrieve' and self.request.user.is_authenticated and str(self.request.user.id) == self.kwargs.get('pk'):
-                return [IsAuthenticated()]
-            return [IsAdminUser()]
-        return [AllowAny()] # Можно оставить AllowAny для регистрации, если она обрабатывается отдельно.
+        # выбор разрешений в зависимости от действия
+        if self.action == 'create':
+            # если вы хотите разрешить регистрацию через этот ViewSet — Change to AllowAny.
+            # Обычно регистрация через отдельный RegisterView, поэтому:
+            return [permissions.IsAdminUser()]
+        if self.action == 'list':
+            return [permissions.IsAdminUser()]
+        if self.action in ['retrieve']:
+            return [permissions.IsAuthenticated(), IsOwnerOrAdmin()]
+        if self.action in ['update', 'partial_update', 'destroy']:
+            return [permissions.IsAuthenticated(), IsOwnerOrAdmin()]
+        # По умолчанию: требуем аутентификацию
+        return [permissions.IsAuthenticated()]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user and user.is_staff:
+            return User.objects.all()
+        if user and user.is_authenticated:
+            # возвращаем только собственную запись
+            return User.objects.filter(pk=user.pk)
+        # аноним не видит пользователей
+        return User.objects.none()
+
+    def perform_create(self, serializer):
+        # если разрешаем create здесь
+        serializer.save()
 
 
 class PaintingImageViewSet(mixins.CreateModelMixin,

@@ -21,12 +21,11 @@ const RedactModal: React.FC<RedactModalProps> = ({ data, isOpen, onClose }) => {
   const [updateUser, { error: addError }] = useUpdateUserMutation();
 
   async function handleRedactBtn() {
-    const id = localStorage.getItem('currentUser');
-    if (id) {
-      await updateUser({ id, username, email, first_name: firstName, last_name: lastName });
-      console.log(addError);
-      onClose();
-    }
+    const id = data.id;
+
+    await updateUser({ id, username, email, first_name: firstName, last_name: lastName });
+    console.log(addError);
+    onClose();
   }
 
   // После инициализации хуков — ранний выход, если не открыт
