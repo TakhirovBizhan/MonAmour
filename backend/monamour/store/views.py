@@ -1,6 +1,4 @@
-# store/views.py
-
-from django.db.models import Count, Avg, Q
+from django.db.models import Count, Avg, Q, Prefetch
 from django.utils import timezone
 from rest_framework import viewsets, mixins, permissions
 from rest_framework.decorators import action
@@ -94,31 +92,29 @@ class ArtistViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
     filterset_class = ArtistFilter
-    # Изменено: Разрешаем просмотр всем, но создание/изменение/удаление только аутентифицированным пользователям (или админам)
-    # Если только чтение для всех, а запись для аутентифицированных
-    # permission_classes = [IsAuthenticatedOrReadOnly]
-    # Если создание/обновление/удаление только для админов
+
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             return [IsAdminUser()]  # Только админы могут создавать, обновлять, удалять
         return [AllowAny()]  # Всем разрешено читать
 
     def get_queryset(self):
-        # Переопределяем, чтобы гарантировать аннотацию в любых условиях
-        qs = Artist.objects.all().annotate(
+        # Гарантируем аннотацию среднего рейтинга и числа отзывов
+        return Artist.objects.all().annotate(
             average_rating=Avg('reviews__rating'),
             reviews_count=Count('reviews')
         )
-        return qs
 
     @action(detail=True, methods=['get'], url_path='reviews')
     def reviews(self, request, pk=None):
         """
         GET /api/artists/{id}/reviews/
         Возвращает отзывы для данного автора, с пагинацией.
+        При этом подтягиваем связанные объекты через select_related.
         """
         artist = self.get_object()
-        reviews_qs = ArtistReview.objects.filter(artist=artist).order_by('-created_at')
+        # выбираем отзывы с select_related('user', 'artist')
+        reviews_qs = ArtistReview.objects.filter(artist=artist).select_related('user', 'artist').order_by('-created_at')
         page = self.paginate_queryset(reviews_qs)
         if page is not None:
             serializer = ArtistReviewSerializer(page, many=True, context={'request': request})
@@ -135,7 +131,7 @@ class GalleryViewSet(viewsets.ModelViewSet):
     serializer_class = GallerySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
-    # Изменено: Только админы могут создавать, обновлять, удалять галереи. Всем разрешено читать.
+
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             return [IsAdminUser()]
@@ -158,7 +154,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['name']
-    # Изменено: Только админы могут создавать, обновлять, удалять категории. Всем разрешено читать.
+
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             return [IsAdminUser()]
@@ -181,14 +177,15 @@ class PaintingViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PaintingFilter
     pagination_class = PaintingPagination
-    # Изменено: Только админы могут создавать, обновлять, удалять картины. Всем разрешено читать.
+
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             return [IsAdminUser()]
         return [AllowAny()]
 
     def get_queryset(self):
-        qs = Painting.objects.in_stock().select_related('gallery').prefetch_related('images')
+        # Подтягиваем gallery через select_related, а изображения через prefetch_related
+        qs = Painting.objects.in_stock().select_related('gallery', 'artist').prefetch_related('images')
         params = self.request.query_params
         if params.get('min_price'):
             qs = qs.filter(price__gt=params['min_price'])
@@ -206,12 +203,12 @@ class PaintingViewSet(viewsets.ModelViewSet):
                 filter=Q(promotions__start__lte=now, promotions__end__gte=now)
             )
         )
-                # Добавляем аннотацию: сколько раз картина была добавлена в корзину
-        # Если FK Cart.painting без related_name, то default related_name 'cart_set'
+        # Добавляем аннотацию: сколько раз картина была добавлена в корзину
+        # Предполагается, что в модели Cart FK на Painting имеет related_name='cart' или аналог.
+        # Если related_name='cart', то:
         qs = qs.annotate(
             times_added_to_cart=Count('cart')
         )
-
         return qs
 
     def get_serializer_context(self):
@@ -239,11 +236,12 @@ class BannerViewSet(viewsets.ModelViewSet):
     serializer_class = BannerSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['headline']
-    # Изменено: Только админы могут создавать, обновлять, удалять баннеры. Всем разрешено читать.
+
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             return [IsAdminUser()]
         return [AllowAny()]
+
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     """
@@ -251,7 +249,8 @@ class IsOwnerOrAdmin(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, obj):
         # obj здесь экземпляр User
-        return bool(request.user and (request.user.is_staff or obj == request.user))    
+        return bool(request.user and (request.user.is_staff or obj == request.user))
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -259,8 +258,8 @@ class UserViewSet(viewsets.ModelViewSet):
     - list: только админ может получить список.
     - retrieve: владелец или админ.
     - update/partial_update: владелец или админ.
-    - destroy: владелец или админ (или можно запретить удалять себя).
-    - create: только админ (или отключить).
+    - destroy: владелец или админ.
+    - create: только админ (регистрация обычно через отдельный endpoint).
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -268,18 +267,13 @@ class UserViewSet(viewsets.ModelViewSet):
     filterset_fields = ['username', 'email']
 
     def get_permissions(self):
-        # выбор разрешений в зависимости от действия
         if self.action == 'create':
-            # если вы хотите разрешить регистрацию через этот ViewSet — Change to AllowAny.
-            # Обычно регистрация через отдельный RegisterView, поэтому:
+            # Регистрация обычно через отдельный RegisterView, поэтому здесь — только админ
             return [permissions.IsAdminUser()]
         if self.action == 'list':
             return [permissions.IsAdminUser()]
-        if self.action in ['retrieve']:
+        if self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
             return [permissions.IsAuthenticated(), IsOwnerOrAdmin()]
-        if self.action in ['update', 'partial_update', 'destroy']:
-            return [permissions.IsAuthenticated(), IsOwnerOrAdmin()]
-        # По умолчанию: требуем аутентификацию
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
@@ -287,13 +281,10 @@ class UserViewSet(viewsets.ModelViewSet):
         if user and user.is_staff:
             return User.objects.all()
         if user and user.is_authenticated:
-            # возвращаем только собственную запись
             return User.objects.filter(pk=user.pk)
-        # аноним не видит пользователей
         return User.objects.none()
 
     def perform_create(self, serializer):
-        # если разрешаем create здесь
         serializer.save()
 
 
@@ -307,7 +298,7 @@ class PaintingImageViewSet(mixins.CreateModelMixin,
       - GET list/retrieve: просмотр изображений
     """
     queryset = PaintingImage.objects.all()
-    # Изменено: Только аутентифицированные пользователи могут создавать изображения. Всем разрешено читать.
+
     def get_permissions(self):
         if self.action == 'create':
             return [IsAuthenticated()]
@@ -320,33 +311,32 @@ class PaintingImageViewSet(mixins.CreateModelMixin,
 
 
 class ArtistReviewViewSet(viewsets.ModelViewSet):
+    """
+    CRUD для отзывов об авторах.
+    - Просмотр отзывов разрешён всем.
+    - Создание: только аутентифицированные.
+    - Изменение/удаление: только владелец или staff.
+    """
     serializer_class = ArtistReviewSerializer
-    # Изменено: По умолчанию, только аутентифицированные пользователи могут создавать отзывы,
-    # и только владелец отзыва или staff может изменять/удалять его.
-    # Просмотр отзывов разрешен всем.
-    permission_classes = [IsAuthenticatedOrReadOnly] # Для чтения всем, для записи - аутентифицированным
+    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['artist', 'user', 'rating']
 
     def get_queryset(self):
-        # Возвращаем все отзывы
+        # Возвращаем все отзывы с подтягиванием связанных artist и user
         return ArtistReview.objects.all().select_related('artist', 'user')
 
     def perform_create(self, serializer):
-        # Убедимся, что user из токена автоматически связывается с отзывом,
-        # если пользователь не является админом и не передал user_id.
-        # Если админ передает user_id, то он может создать отзыв от имени другого пользователя.
+        # Если обычный пользователь создает — привязываем к request.user
         if self.request.user.is_authenticated and not self.request.user.is_staff:
             serializer.save(user=self.request.user)
         else:
-            serializer.save() # Для админа или если user_id указан в validated_data
+            # Админ может указать user через payload или просто создать
+            serializer.save()
 
     def get_permissions(self):
         if self.action in ('update', 'partial_update', 'destroy'):
-            # Для обновления и удаления - аутентифицированному пользователю, который является владельцем или staff.
             return [IsAuthenticated(), IsReviewOwnerOrReadOnly()]
         if self.action == 'create':
-            # Для создания - только аутентифицированным пользователям.
             return [IsAuthenticated()]
-        # Для остальных действий (например, list, retrieve) - всем.
         return [AllowAny()]
