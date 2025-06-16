@@ -13,6 +13,12 @@
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.header {
+  display: flex;
+  gap: 30px;
 }
 
 .text_block {

@@ -1,3 +1,4 @@
+// pages/MainPage.tsx (или где у вас находится MainPage)
 import Text from '../../../components/Text';
 import s from './mainPage.module.scss';
 import '../../../styles/styles.scss';
@@ -15,6 +16,8 @@ import Button from '../../../components/Button';
 import AddPaintingModal from './components/AddPaintingModal/addPaintingModal';
 import AuthorWidget from './components/Widgets/authorWidget';
 import CategoryWidget from './components/Widgets/categoryWidget';
+// Импорт для проверки текущего юзера:
+import { useGetMeQuery } from '../../../store/api/Auth.api';
 
 const MainPage = () => {
   const pathname = window.location.pathname;
@@ -30,6 +33,11 @@ const MainPage = () => {
   const categoryName = categoryRaw ? CategoryData?.name : 'Картины';
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  // Получаем текущего пользователя
+  const { data: me, isLoading: meLoading, isError: meError } = useGetMeQuery();
+  // Определяем, админ ли
+  const isAdmin = Boolean(me && me.role === 'admin');
 
   return (
     <main className={s.root}>
@@ -57,8 +65,15 @@ const MainPage = () => {
           <div className={s.filters__block}>
             <FiltersByGallery />
             <FiltersByOrder />
-            <Button onClick={() => setIsModalOpen(true)}>+</Button>
-            <AddPaintingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+            {/* Кнопка + модалка добавления карточки отображаются только для админа */}
+            {!meLoading && isAdmin && (
+              <>
+                <Button onClick={() => setIsModalOpen(true)}>+</Button>
+                <AddPaintingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+              </>
+            )}
+            {/* Пока meLoading можно ничего не отображать или спиннер, если нужно */}
           </div>
         </div>
         <div className={s.root__pagination_block}>
