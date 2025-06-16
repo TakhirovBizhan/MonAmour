@@ -5,13 +5,19 @@ import s from './Profile.module.scss';
 import Redact from './components/redact';
 import Button from '../../../components/Button';
 import { useGetMeQuery } from '../../../store/api/Auth.api';
+import { useAuth } from '../../../hooks/useAuth/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const { data: profileData, isLoading: loading } = useGetMeQuery();
   const [isModalOpen, setModalOpen] = useState(false);
 
-  function logout(): void {
-    console.log('do nothing');
+  const navigate = useNavigate();
+
+  const { logout } = useAuth();
+  function handleLogout() {
+    logout();
+    navigate('/login');
   }
 
   return (
@@ -23,7 +29,7 @@ const Profile = () => {
           <div className={s.root}>
             <img
               className={s.img}
-              src={`https://avatar.iran.liara.run/username?username=${profileData?.first_name + profileData?.last_name}`}
+              src={`https://avatar.iran.liara.run/username?username=${profileData?.first_name}`}
               alt={'avatar'}
             />
             <div>
@@ -44,7 +50,7 @@ const Profile = () => {
               <Text view="p-18">Фамилия: {profileData?.last_name}</Text>
             </div>
           </div>
-          <Button className={s.button} onClick={logout}>
+          <Button className={s.button} onClick={handleLogout}>
             Выход
           </Button>
         </>

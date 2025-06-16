@@ -38,7 +38,9 @@ const Order: React.FC = () => {
 
   return (
     <div className={s.wrapper}>
-      <Text view="title">Заказ #{order.id}</Text>
+      <Text className={s.title} view="title">
+        Заказ #{order.id}
+      </Text>
       <div className={s.section}>
         <Text view="p-18" color="secondary">
           Дата: {formatDate(order.order_date)}
@@ -47,8 +49,11 @@ const Order: React.FC = () => {
           Статус: {order.status}
         </Text>
       </div>
+
       <div className={s.section}>
-        <Text view="min-title">Адрес доставки</Text>
+        <Text className={s.min_title} view="min-title">
+          Адрес доставки
+        </Text>
         <div className={s.address}>
           <Text view="p-18">Улица: {order.street}</Text>
           <Text view="p-18">Дом: {order.house_number}</Text>
@@ -56,13 +61,15 @@ const Order: React.FC = () => {
           <Text view="p-18">Почтовый индекс: {order.postal_code}</Text>
           {order.address_comment && <Text view="p-18">Комментарий: {order.address_comment}</Text>}
         </div>
-      </div>
-      <div className={s.section}>
-        <Text view="min-title">Оплата и контакт</Text>
+
+        <Text className={s.min_title} view="min-title">
+          Оплата и контакт
+        </Text>
         <Text view="p-18">Способ оплаты: {order.payment_method === 'card' ? 'Картой' : 'Наличными'}</Text>
         <Text view="p-18">Телефон: {order.phone_number || '-'}</Text>
         <Text view="p-18">Пользователь: {order.user}</Text>
       </div>
+
       <div className={s.section}>
         <Text view="min-title">Картины в заказе</Text>
         <ul className={s.itemsList}>

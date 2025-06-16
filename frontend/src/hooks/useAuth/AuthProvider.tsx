@@ -68,6 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('refreshToken');
     setIsAuthenticated(false);
     setUser(null);
+
+    // перенаправляем на страницу логина:
   };
 
   // Пока не закончили инициализацию (initialized=false), можно рендерить Loader или null

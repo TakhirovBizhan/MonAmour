@@ -1,0 +1,33 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/styles.scss" as *;
+
+.wrapper {
+    @include wrapper;
+  }
+
+  .itemImage {
+    max-width: 400px;
+  }
+
+  .itemInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 5px;
+  }
+
+.itemsList {
+    display: flex;
+    gap: 50px;
+    column-gap: 50px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.title {
+    margin-top: 50px;
+}
+
+.min_title {
+    margin-bottom: 10px;
+}
