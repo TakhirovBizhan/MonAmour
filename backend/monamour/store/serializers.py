@@ -242,6 +242,17 @@ class PaintingSerializer(serializers.ModelSerializer):
                 if field_name not in allowed:
                     self.fields.pop(field_name)
 
+    def validate_title(self, value):
+        """
+        Проверка, чтобы не было картин с одинаковым title (игнорируется self.instance при обновлении).
+        """
+        qs = Painting.objects.filter(title__iexact=value.strip())
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(_("Картина с таким названием уже существует."))
+        return value
+
     def get_discounted_price(self, obj):
         return obj.discounted_price()
 

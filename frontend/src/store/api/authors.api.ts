@@ -10,6 +10,7 @@ export type artistReviewResponce = {
     "updated_at": string
 }
 
+
 export type artistResponce = {
     "id": string,
     "name": string,
@@ -19,6 +20,16 @@ export type artistResponce = {
     "website": null,
     "average_rating": 4.0 | null,
     "reviews_count": number
+};
+
+export type ArtistReviewResponse = {
+    id: string;
+    artist: artistResponce;
+    user: string; // username или id? Ваш сериализатор StringRelatedField даёт str(self.user)
+    rating: number;
+    comment: string | null;
+    created_at: string;
+    updated_at: string;
 };
 
 export const CartApi = api.injectEndpoints({
@@ -38,6 +49,14 @@ export const CartApi = api.injectEndpoints({
             }),
         }),
 
+        createArtistReview: builder.mutation<ArtistReviewResponse, { artist_id: string; rating: number; comment?: string }>({
+            query: ({ artist_id, rating, comment }) => ({
+                url: `/artist-reviews/`,
+                method: "POST",
+                body: { artist_id, rating, comment },
+            }),
+        }),
+
         getReviewsByArtist: builder.query<artistReviewResponce[], string>({
             query: (id) => ({
                 url: `/artist-reviews/?artist=${id}`,
@@ -50,5 +69,6 @@ export const CartApi = api.injectEndpoints({
 export const {
     useGetArtistsQuery,
     useGetArtistQuery,
-    useGetReviewsByArtistQuery
+    useGetReviewsByArtistQuery,
+    useCreateArtistReviewMutation
 } = CartApi;

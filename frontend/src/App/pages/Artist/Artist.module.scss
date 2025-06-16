@@ -20,8 +20,86 @@
     flex-direction: column;
     justify-content: space-evenly;
     width: 800px;
+    flex: 1;
 }
 
 .review_block {
     margin-bottom: 30px;
 }
+
+  
+  .actionsRow {
+    margin-bottom: 24px;
+  }
+  
+  .review_item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal {
+    background: #444444;
+    padding: 24px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+  }
+  
+  .closeBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .form {
+    margin-top: 16px;
+  }
+  
+  .field {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .field label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+  
+  .cancelBtn {
+    background: #ccc;
+    color: #000;
+  }
+  
+  .errorMsg {
+    margin-top: -8px;
+    margin-bottom: 8px;
+  }

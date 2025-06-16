@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django import forms
 from django.utils.html import format_html
 from .models import Artist, Gallery, Category, Painting, Banner, PaintingImage
 from django.utils import timezone
@@ -40,6 +41,20 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     list_display_links = ('id', 'name')
 
+class PaintingAdminForm(forms.ModelForm):
+    class Meta:
+        model = Painting
+        fields = '__all__'
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title', '').strip()
+        qs = Painting.objects.filter(title__iexact=title)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Картина с таким названием уже существует.")
+        return title
+
 class PaintingImageInline(admin.TabularInline):
     model = PaintingImage
     extra = 1
@@ -53,6 +68,7 @@ class PaintingImageInline(admin.TabularInline):
 
 @admin.register(Painting)
 class PaintingAdmin(admin.ModelAdmin):
+    form = PaintingAdminForm  # подключаем форму с проверкой clean_title
     list_display = ('title', 'artist', 'gallery', 'status', 'added_at', 'price')
     list_filter = ('artist', 'gallery', 'status', 'added_at')
     date_hierarchy = 'added_at'
@@ -62,11 +78,7 @@ class PaintingAdmin(admin.ModelAdmin):
     list_display_links = ('title', 'artist', 'gallery')
     inlines = [PaintingImageInline]
     
-    @admin.display(boolean=True, description='Активна сейчас')
-    def is_active(self) -> bool:
-        now = timezone.now()
-        return self.start <= now <= self.end
-
+    
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
     list_display = ('headline', 'subheadline', 'image_preview')
@@ -79,3 +91,8 @@ class BannerAdmin(admin.ModelAdmin):
         if obj.banner_image:
             return format_html('<img src="{}" width="100" />', obj.banner_image.url)
         return 'Нет изображения'
+    
+    @admin.display(boolean=True, description='Активна сейчас')
+    def is_active(self) -> bool:
+        now = timezone.now()
+        return self.start <= now <= self.end
