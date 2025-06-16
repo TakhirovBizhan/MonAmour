@@ -6,12 +6,17 @@ export const OrdersApi = api.injectEndpoints({
     endpoints: (builder) => ({
         // Запрос списка заказов текущего пользователя
         getOrders: builder.query<OrderResponse[], void>({
-            // Предполагаем, что бэкенд поддерживает фильтрацию по ?user=<id>
-            query: () => {
-                const userId = localStorage.getItem('currentUser');
-                // Если backend не требует параметра user (берёт из токена), уберите параметр
-                return `/orders/?user=${userId}`;
-            },
+            query: () => ({
+                url: `/orders/`,
+                method: "GET",
+            }),
+            providesTags: (result) =>
+                result
+                    ? [
+                        { type: "Order" as const, id: "LIST" },
+                        ...result.map((order) => ({ type: "Order" as const, id: order.id })),
+                    ]
+                    : [{ type: "Order" as const, id: "LIST" }],
         }),
 
         // Мутация: создание заказа
