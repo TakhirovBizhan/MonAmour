@@ -19,8 +19,6 @@ type ProductListProps = {
 };
 
 export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error }) => {
-  const user_id = localStorage.getItem('currentUser')!;
-
   // Состояние для модалки редактирования:
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedPainting, setSelectedPainting] = useState<Painting | null>(null);
@@ -55,7 +53,7 @@ export const ProductList: React.FC<ProductListProps> = ({ data, isLoading, error
         await removeFromCart(cartItemId);
       }
     } else {
-      await addToCart({ user: user_id, painting_id: paintingId });
+      await addToCart({ painting_id: paintingId });
     }
   };
 

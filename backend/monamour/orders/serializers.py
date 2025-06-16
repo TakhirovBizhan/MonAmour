@@ -1,5 +1,3 @@
-# orders/serializers.py
-
 from rest_framework import serializers
 from .models import Cart, Order, OrderItem
 from store.serializers import PaintingSerializer
@@ -9,41 +7,45 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class CartSerializer(serializers.ModelSerializer):
+    # При чтении вложенно отдаём информацию о картине
     painting = PaintingSerializer(read_only=True)
+    # При записи указываем только painting_id; user привязывается из request.user
     painting_id = serializers.PrimaryKeyRelatedField(
         queryset=Painting.objects.all(),
         source='painting',
         write_only=True
     )
-    # Убираем painting_add_count из полей, если не нужна в клиенте; 
-    # если нужна, то её можно аннотировать в ViewSet и вернуть read_only поле:
+    # Если хотим вернуть в ответе, сколько раз эта же картина в разных корзинах,
+    # аннотация задаётся во ViewSet (painting_add_count). Здесь читаем её:
     painting_add_count = serializers.IntegerField(read_only=True)
+    # user показываем read-only (id текущего пользователя)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Cart
-        # user оставляем read_only, т.к. привязываем по request.user
+        # user — read_only, painting — read_only, painting_id — write_only, added_at — read_only
         fields = ['id', 'user', 'painting', 'painting_id', 'added_at', 'painting_add_count']
         read_only_fields = ['id', 'user', 'added_at', 'painting', 'painting_add_count']
 
     def create(self, validated_data):
         """
-        При создании корзины-привязываем к request.user.
+        При создании Cart объект привязываем к request.user.
         """
         request = self.context.get('request')
-        user = None
-        if request and request.user and request.user.is_authenticated:
-            user = request.user
-        else:
+        if not (request and request.user and request.user.is_authenticated):
             raise serializers.ValidationError("Необходима аутентификация для добавления в корзину.")
-        # painting уже в validated_data['painting']
-        cart_obj = Cart.objects.create(user=user, painting=validated_data['painting'])
+        painting = validated_data.get('painting')
+        # Проверка: можно, например, запретить дублирование — если необходимо, раскомментируйте:
+        # if Cart.objects.filter(user=request.user, painting=painting).exists():
+        #     raise serializers.ValidationError("Эта картина уже в вашей корзине.")
+        cart_obj = Cart.objects.create(user=request.user, painting=painting)
         return cart_obj
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
     # Возвращаем вложенный объект Painting при чтении
     painting = PaintingSerializer(read_only=True)
-    # Для записи при создании заказа:
+    # Для создания через OrderSerializer: painting_id
     painting_id = serializers.PrimaryKeyRelatedField(
         queryset=Painting.objects.all(),
         source='painting',
@@ -66,21 +68,20 @@ class OrderSerializer(serializers.ModelSerializer):
         required=True,
         help_text='Список ID картин для заказа'
     )
-    # Поля адреса:
+    # Адресные поля
     street = serializers.CharField()
     house_number = serializers.CharField()
     city = serializers.CharField()
     postal_code = serializers.CharField()
     address_comment = serializers.CharField(allow_blank=True, required=False)
-    # Способ оплаты:
-    # Предполагается, что в модели Order поле payment_method определено с choices
+    # Способ оплаты: в модели Order должно быть поле payment_method с choices
     payment_method = serializers.ChoiceField(
         choices=Order._meta.get_field('payment_method').choices,
         default='card'
     )
-    # Телефон:
     phone_number = serializers.CharField()
 
+    # user и order_date, status, items — read_only
     class Meta:
         model = Order
         fields = [
@@ -89,7 +90,6 @@ class OrderSerializer(serializers.ModelSerializer):
             'payment_method', 'phone_number',
             'painting_ids', 'items'
         ]
-        # user, order_date, status и items — read_only
         read_only_fields = ['id', 'user', 'order_date', 'status', 'items']
 
     def validate(self, attrs):
@@ -99,7 +99,7 @@ class OrderSerializer(serializers.ModelSerializer):
             val = attrs.get(field)
             if val is None or not str(val).strip():
                 errors[field] = 'Это поле обязательно.'
-        # Проверяем painting_ids
+        # painting_ids не должен быть пустым
         painting_ids = attrs.get('painting_ids')
         if painting_ids is None or not isinstance(painting_ids, list) or not painting_ids:
             errors['painting_ids'] = 'Список картин не может быть пуст.'
@@ -109,37 +109,39 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Создаём заказ, привязывая к request.user, создаём OrderItem-ы.
+        Создаём заказ, привязывая к request.user, затем создаём OrderItem для каждой картины.
         """
         request = self.context.get('request')
         if not (request and request.user and request.user.is_authenticated):
             raise serializers.ValidationError('Необходима аутентификация для создания заказа.')
 
         painting_ids = validated_data.pop('painting_ids', [])
-        # Забираем пользователя из request.user
         user = request.user
 
         # Создаём Order
         try:
-            order = Order.objects.create(user=user,
-                                         street=validated_data.get('street'),
-                                         house_number=validated_data.get('house_number'),
-                                         city=validated_data.get('city'),
-                                         postal_code=validated_data.get('postal_code'),
-                                         address_comment=validated_data.get('address_comment', None),
-                                         payment_method=validated_data.get('payment_method'),
-                                         phone_number=validated_data.get('phone_number'),
-                                         # status оставляем дефолтный, возможно 'processing'
-                                         )
+            order = Order.objects.create(
+                user=user,
+                street=validated_data.get('street'),
+                house_number=validated_data.get('house_number'),
+                city=validated_data.get('city'),
+                postal_code=validated_data.get('postal_code'),
+                address_comment=validated_data.get('address_comment', None),
+                payment_method=validated_data.get('payment_method'),
+                phone_number=validated_data.get('phone_number'),
+                # status пусть дефолтно = 'processing' или как задано в модели
+            )
         except Exception as e:
             raise serializers.ValidationError({'non_field_errors': f"Ошибка создания заказа: {e}"})
 
-        # Создаём OrderItem-ы
+        # Проверяем корректность ID картин
         paintings = Painting.objects.filter(id__in=painting_ids)
         if paintings.count() != len(painting_ids):
-            # Удаляем заказ, чтобы не оставить мусор
+            # Удаляем заказ, чтобы не оставлять «пустой» заказ
             order.delete()
             raise serializers.ValidationError({'painting_ids': 'Некоторые переданные ID картин некорректны.'})
+
+        # Создаём OrderItem-ы
         try:
             for painting in paintings:
                 OrderItem.objects.create(
@@ -155,10 +157,10 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """
-        При обновлении заказа запрещаем менять user и items через этот эндпоинт.
-        Остальные поля (адрес, статус при admin и т.д.) можно менять по логике.
+        При обновлении заказа через этот эндпоинт:
+        - user менять нельзя (read_only_fields его исключили)
+        - items нельзя менять здесь (через отдельные API или логику)
+        Остальные поля (адрес, статус и т.п.) можно изменять согласно логике.
         """
-        # Удаляем потенциальные попытки изменить user или painting_ids
         validated_data.pop('painting_ids', None)
-        # user и items уже read_only
         return super().update(instance, validated_data)

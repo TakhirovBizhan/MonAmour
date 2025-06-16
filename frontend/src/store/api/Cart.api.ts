@@ -15,37 +15,29 @@ export type cartResponce = {
 export const CartApi = api.injectEndpoints({
     endpoints: (builder) => ({
 
-        add: builder.mutation<void, cartPostType>({
-            query: (regData) => ({
-                url: "/carts/",
-                method: "POST",
-                body: regData,
+        add: builder.mutation<void, { painting_id: string }>({
+            query: ({ painting_id }) => ({
+                url: '/carts/',
+                method: 'POST',
+                body: { painting_id },
             }),
-            invalidatesTags: [{ type: 'Cart', id: 'LIST' }],  // ← после добавления перезапросить список
+            invalidatesTags: [{ type: 'Cart', id: 'LIST' }],
         }),
-
+        getCart: builder.query<any[], void>({
+            query: () => ({ url: '/carts/' }),
+            providesTags: (result) => result
+                ? [
+                    { type: 'Cart' as const, id: 'LIST' },
+                    ...result.map(item => ({ type: 'Cart' as const, id: item.id })),
+                ]
+                : [{ type: 'Cart' as const, id: 'LIST' }],
+        }),
         delete: builder.mutation<void, string>({
             query: (cartId) => ({
-                url: `/carts/${cartId}`,
-                method: "DELETE",
+                url: `/carts/${cartId}/`,
+                method: 'DELETE',
             }),
-            invalidatesTags: [{ type: 'Cart', id: 'LIST' }],  // ← после удаления перезапросить список
-        }),
-
-        getCart: builder.query<cartResponce[], void>({
-            query: () => ({
-                url: `/carts/?user=${localStorage.getItem('currentUser')}`,
-                method: "GET",
-            }),
-            providesTags: (result) =>
-                result
-                    ? [
-                        // тэг на весь список
-                        { type: 'Cart' as const, id: 'LIST' },
-                        // плюс тэги на отдельные элементы, если нужно
-                        ...result.map(({ id }) => ({ type: 'Cart' as const, id })),
-                    ]
-                    : [{ type: 'Cart' as const, id: 'LIST' }],
+            invalidatesTags: [{ type: 'Cart', id: 'LIST' }],
         }),
 
     }),

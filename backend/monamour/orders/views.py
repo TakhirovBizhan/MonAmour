@@ -1,5 +1,3 @@
-# orders/views.py
-
 from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Cart, Order, OrderItem
@@ -8,103 +6,102 @@ from django.db.models import Count
 
 class CartViewSet(viewsets.ModelViewSet):
     """
-    CRUD для корзины.
-    Только авторизованные пользователи могут добавлять/удалять свои записи.
-    Пользователь видит только свои записи в корзине.
+    CRUD для корзины:
+    - Только авторизованные пользователи могут добавлять/просматривать/удалять свои записи.
+    - Админ может видеть/удалять любые записи (по вашему решению).
     """
     serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ['user']
+    # Удаляем фильтрацию по 'user' из query params, т.к. get_queryset ограничивает видимость.
+    filterset_fields = []
 
     def get_queryset(self):
-        # Возвращаем только записи корзины текущего пользователя
         user = self.request.user
-        # Если есть админ, можно вернуть все или по-другому; здесь считаем, что админ тоже видит все
+        # Если админ, можно вернуть все записи корзины; иначе — только свои
         if user.is_staff:
-            # аннотируем painting_add_count: сколько раз каждая картина добавлена во все корзины
+            # Для каждой записи аннотируем, сколько раз эта же картина в любых корзинах:
             return Cart.objects.select_related('user', 'painting') \
                 .annotate(painting_add_count=Count('painting__cart')).all()
-        # Обычный пользователь видит только свои записи
         return Cart.objects.filter(user=user).select_related('user', 'painting') \
             .annotate(painting_add_count=Count('painting__cart'))
 
     def perform_create(self, serializer):
-        # create в сериализаторе уже привязывает к request.user
+        # serializer.create привяжет к request.user внутри CartSerializer.create
         serializer.save()
 
-    def perform_update(self, serializer):
-        # Если хотите запретить изменение записи корзины (например, менять painting), 
-        # можно не реализовывать update, либо запретить. Здесь оставляем дефолт.
-        serializer.save()
+    # Обновление записи корзины обычно не нужно (человек не меняет картину), но если нужно:
+    # def perform_update(self, serializer):
+    #     serializer.save()
 
-    # При удалении: permission_classes обеспечивает, что только владелец/авторизованный может удалять
-    # Если нужна дополнительная проверка, можно override perform_destroy.
+    # Удаление: DRF возьмёт объект из get_queryset; обычный пользователь не сможет удалить чужой, т.к. он не в get_queryset.
+    # Если нужно дополнительная проверка, можно override perform_destroy:
+    # def perform_destroy(self, instance):
+    #     if instance.user != self.request.user and not self.request.user.is_staff:
+    #         raise permissions.PermissionDenied("Нельзя удалять чужую запись корзины.")
+    #     instance.delete()
 
 
 class OrderViewSet(viewsets.ModelViewSet):
     """
-    CRUD для заказов.
+    CRUD для заказов:
     - Только авторизованный пользователь может создавать заказ.
-    - При GET пользователь видит только свои заказы; admin видит все.
-    - При обновлении/удалении: можно разрешить только владельцу или админу.
+    - Обычный пользователь видит/меняет только свои заказы; админ видит/меняет все.
+    - Статус заказа менять, возможно, только админом (но здесь для простоты разрешаем владельцу менять адрес и телефон).
     """
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ['user']  # admin может фильтровать по пользователю
+    # Разрешаем фильтрацию по user только для админа; у обычного get_queryset ограничит видимые.
+    filterset_fields = ['user']
 
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            # admin видит все
             return Order.objects.select_related('user').all()
-        # обычный пользователь видит только свои
         return Order.objects.select_related('user').filter(user=user)
 
     def perform_create(self, serializer):
-        # сериализатор create сам привяжет user=request.user
+        # Привязка к request.user происходит внутри OrderSerializer.create
         serializer.save()
 
-    # Чтобы запретить update чужих заказов, достаточно permission_classes=[IsAuthenticated]
-    # и get_queryset ограничивает видимые. Для дополнительной проверки в update/destroy:
     def perform_update(self, serializer):
-        # Здесь можно добавить логику: например, позволить менять статус только admin.
-        # Для простоты: разрешаем владельцу менять только адрес/телефон (из сериализатора).
+        # Здесь можно добавить логику: например, только админ может менять status:
+        # order = serializer.instance
+        # if 'status' in serializer.validated_data and not self.request.user.is_staff:
+        #     raise permissions.PermissionDenied("Только админ может менять статус заказа.")
         serializer.save()
 
-    def perform_destroy(self, instance):
-        # Можно запретить удаление заказов после создания, если нужно:
-        # instance.delete()
-        instance.delete()
+    # Если хотите запретить удаление заказов после создания:
+    # def perform_destroy(self, instance):
+    #     raise permissions.PermissionDenied("Нельзя удалять заказы.")
+    # Иначе:
+    # def perform_destroy(self, instance):
+    #     instance.delete()
 
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     """
-    CRUD для элементов заказа.
-    Как правило, создание/удаление OrderItem происходит внутри OrderSerializer.create.
-    Поэтому отдельно создавать OrderItem через API часто не нужно или можно запретить обычным пользователям.
-    Здесь ставим разрешения IsAuthenticatedOrReadOnly, но можно детализировать.
+    CRUD для элементов заказа:
+    - Обычно создание/удаление OrderItem делается в OrderSerializer.create, 
+      прямое создание OrderItem через API не требуется или ограничено.
+    - Здесь: только авторизованные пользователи. 
+    - Обычные пользователи видят только элементы своих заказов; админ видит все.
     """
-    queryset = OrderItem.objects.select_related('order', 'painting')
     serializer_class = OrderItemSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = (DjangoFilterBackend,)
-    # Можно фильтровать по order, если нужно:
-    filterset_fields = ['order', 'painting']
+    filterset_fields = ['order', 'painting']  # admin может фильтровать; обычный get_queryset ограничит
 
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
             return OrderItem.objects.select_related('order', 'painting').all()
-        # Обычный пользователь видит элементы только своих заказов
-        return OrderItem.objects.select_related('order', 'painting')\
-            .filter(order__user=user)
+        # Только элементы, относящиеся к заказам текущего пользователя
+        return OrderItem.objects.select_related('order', 'painting').filter(order__user=user)
 
     def perform_create(self, serializer):
-        # Обычно не создают OrderItem напрямую; но если нужно:
         order = serializer.validated_data.get('order')
-        # Проверяем, что order принадлежит request.user или пользователь — админ
         if order.user != self.request.user and not self.request.user.is_staff:
             raise permissions.PermissionDenied("Нельзя добавлять элементы в чужой заказ.")
         serializer.save()
