@@ -18,8 +18,8 @@ export const ThemeToggle = () => {
   };
 
   return (
-    <button onClick={toggleTheme} className={s.button}>
-      <img className={s.img} src={theme === 'dark' ? moon : sun} />
+    <button onClick={toggleTheme} className={s.button} id="theme_icon" aria-label="кнопка смены темы">
+      <img className={s.img} src={theme === 'dark' ? moon : sun} alt="кнопка смены темы" />
     </button>
   );
 };

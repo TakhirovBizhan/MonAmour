@@ -15,11 +15,11 @@ const Header = () => {
     <header className={styles.header}>
       <div className={styles.header__wrapper}>
         <div className={styles.logo_burger_block}>
-          <button className={styles.burger_btn}>
+          <button className={styles.burger_btn} id="burger_btn" aria-label="бургер-меню">
             <img src={theme !== 'dark' ? burgerSvg : lightBurger} alt="бургер-меню" />
           </button>
           <Link to="/main">
-            <div className={styles.logo}>
+            <div className={styles.logo} id="burger_btn" aria-label="Логотип">
               <img className={styles.header__logo} src={logoSvg} alt="Логотип" />
               <Text view="min-title" tag="h1" className={styles.title}>
                 Mon Amour
@@ -56,7 +56,7 @@ const Header = () => {
         <div className={styles.header__icons_block}>
           <ThemeToggle />
           <Link to="/cart">
-            <button className={styles.icon}>
+            <button className={styles.icon} id="bucket" aria-label="корзина">
               <img className={styles.img} src={bagSvg} alt="корзина" />
             </button>
           </Link>
