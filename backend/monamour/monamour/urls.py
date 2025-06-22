@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/', include('monamour.api_urls')),
     path('__debug__/', include(debug_toolbar.urls)),
     path('sentry-debug/', trigger_error),
+    path('silk/', include('silk.urls', namespace='silk'))
 ] 
 
 if settings.DEBUG:

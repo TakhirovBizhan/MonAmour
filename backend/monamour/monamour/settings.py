@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    
+    'silk',
     'accounts',
     'store',
     'orders',
@@ -87,6 +87,7 @@ REST_FRAMEWORK = {
 # INSTALLED_APPS += ['debug_toolbar']
 
 MIDDLEWARE = [
+    'silk.middleware.SilkyMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',

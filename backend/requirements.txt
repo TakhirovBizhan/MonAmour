@@ -21,3 +21,4 @@ sentry-sdk[django]
 flake8
 flake8-docstrings
 pydocstyle
+django-silk
