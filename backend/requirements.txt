@@ -11,3 +11,13 @@ django-cors-headers>=4.0
 reportlab>=3.6.0
 drf-extra-fields>=3.7.0
 djangorestframework-simplejwt==5.5.0
+# Для статической типизации Django/DRF:
+mypy
+django-stubs
+djangorestframework-stubs
+sentry-sdk[django]
+
+# Для проверки докстрингов (PEP257) и стиля:
+flake8
+flake8-docstrings
+pydocstyle

@@ -3,49 +3,57 @@ from .models import Cart, Order, OrderItem
 from store.serializers import PaintingSerializer
 from store.models import Painting
 from django.contrib.auth import get_user_model
+from typing import Any, Dict
 
 User = get_user_model()
 
+
 class CartSerializer(serializers.ModelSerializer):
-    # При чтении вложенно отдаём информацию о картине
+    """
+    Сериализатор Cart:
+    - При чтении: возвращает вложенную информацию о картине.
+    - При создании: принимает painting_id, привязывает к request.user.
+    """
     painting = PaintingSerializer(read_only=True)
-    # При записи указываем только painting_id; user привязывается из request.user
     painting_id = serializers.PrimaryKeyRelatedField(
         queryset=Painting.objects.all(),
         source='painting',
         write_only=True
     )
-    # Если хотим вернуть в ответе, сколько раз эта же картина в разных корзинах,
-    # аннотация задаётся во ViewSet (painting_add_count). Здесь читаем её:
     painting_add_count = serializers.IntegerField(read_only=True)
-    # user показываем read-only (id текущего пользователя)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Cart
-        # user — read_only, painting — read_only, painting_id — write_only, added_at — read_only
         fields = ['id', 'user', 'painting', 'painting_id', 'added_at', 'painting_add_count']
         read_only_fields = ['id', 'user', 'added_at', 'painting', 'painting_add_count']
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict[str, Any]) -> Cart:
         """
-        При создании Cart объект привязываем к request.user.
+        Создаёт Cart, привязывая к request.user.
+        Args:
+            validated_data: {'painting': Painting}
+        Returns:
+            Cart: новый объект корзины.
+        Raises:
+            serializers.ValidationError: если пользователь не аутентифицирован.
         """
         request = self.context.get('request')
-        if not (request and request.user and request.user.is_authenticated):
+        if not (request and hasattr(request, 'user') and request.user and request.user.is_authenticated):
             raise serializers.ValidationError("Необходима аутентификация для добавления в корзину.")
-        painting = validated_data.get('painting')
-        # Проверка: можно, например, запретить дублирование — если необходимо, раскомментируйте:
-        # if Cart.objects.filter(user=request.user, painting=painting).exists():
-        #     raise serializers.ValidationError("Эта картина уже в вашей корзине.")
-        cart_obj = Cart.objects.create(user=request.user, painting=painting)
+        painting_obj = validated_data.get('painting')
+        # Если нужно запретить дублирование, можно проверить здесь.
+        cart_obj = Cart.objects.create(user=request.user, painting=painting_obj)
         return cart_obj
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    # Возвращаем вложенный объект Painting при чтении
+    """
+    Сериализатор OrderItem:
+    - Чтение: вложенный PaintingSerializer.
+    - Создание через OrderSerializer: painting_id.
+    """
     painting = PaintingSerializer(read_only=True)
-    # Для создания через OrderSerializer: painting_id
     painting_id = serializers.PrimaryKeyRelatedField(
         queryset=Painting.objects.all(),
         source='painting',
@@ -61,6 +69,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор Order:
+    - Чтение: отдаёт поля заказа и вложенные items.
+    - Создание: принимает painting_ids, адрес, payment_method, phone_number.
+    """
     items = OrderItemSerializer(many=True, read_only=True)
     painting_ids = serializers.ListField(
         child=serializers.UUIDField(),
@@ -68,20 +81,17 @@ class OrderSerializer(serializers.ModelSerializer):
         required=True,
         help_text='Список ID картин для заказа'
     )
-    # Адресные поля
     street = serializers.CharField()
     house_number = serializers.CharField()
     city = serializers.CharField()
     postal_code = serializers.CharField()
     address_comment = serializers.CharField(allow_blank=True, required=False)
-    # Способ оплаты: в модели Order должно быть поле payment_method с choices
     payment_method = serializers.ChoiceField(
         choices=Order._meta.get_field('payment_method').choices,
         default='card'
     )
     phone_number = serializers.CharField()
 
-    # user и order_date, status, items — read_only
     class Meta:
         model = Order
         fields = [
@@ -92,14 +102,22 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'user', 'order_date', 'status', 'items']
 
-    def validate(self, attrs):
-        errors = {}
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Общая валидация адресных полей и painting_ids.
+        Args:
+            attrs: входящие данные.
+        Returns:
+            attrs, если всё ок.
+        Raises:
+            serializers.ValidationError: если обязательные поля пусты или painting_ids некорректен.
+        """
+        errors: Dict[str, str] = {}
         # Проверяем обязательные адресные поля
         for field in ['street', 'house_number', 'city', 'postal_code']:
             val = attrs.get(field)
             if val is None or not str(val).strip():
                 errors[field] = 'Это поле обязательно.'
-        # painting_ids не должен быть пустым
         painting_ids = attrs.get('painting_ids')
         if painting_ids is None or not isinstance(painting_ids, list) or not painting_ids:
             errors['painting_ids'] = 'Список картин не может быть пуст.'
@@ -107,12 +125,18 @@ class OrderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
         return super().validate(attrs)
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict[str, Any]) -> Order:
         """
-        Создаём заказ, привязывая к request.user, затем создаём OrderItem для каждой картины.
+        Создаёт Order и связанные OrderItem.
+        Args:
+            validated_data: включает painting_ids и адресные поля.
+        Returns:
+            Order: созданный заказ.
+        Raises:
+            serializers.ValidationError: если не аутентифицирован пользователь или некорректны painting_ids.
         """
         request = self.context.get('request')
-        if not (request and request.user and request.user.is_authenticated):
+        if not (request and hasattr(request, 'user') and request.user and request.user.is_authenticated):
             raise serializers.ValidationError('Необходима аутентификация для создания заказа.')
 
         painting_ids = validated_data.pop('painting_ids', [])
@@ -122,28 +146,26 @@ class OrderSerializer(serializers.ModelSerializer):
         try:
             order = Order.objects.create(
                 user=user,
-                street=validated_data.get('street'),
-                house_number=validated_data.get('house_number'),
-                city=validated_data.get('city'),
-                postal_code=validated_data.get('postal_code'),
+                street=validated_data.get('street', ''),
+                house_number=validated_data.get('house_number', ''),
+                city=validated_data.get('city', ''),
+                postal_code=validated_data.get('postal_code', ''),
                 address_comment=validated_data.get('address_comment', None),
                 payment_method=validated_data.get('payment_method'),
-                phone_number=validated_data.get('phone_number'),
-                # status пусть дефолтно = 'processing' или как задано в модели
+                phone_number=validated_data.get('phone_number', ''),
             )
         except Exception as e:
             raise serializers.ValidationError({'non_field_errors': f"Ошибка создания заказа: {e}"})
 
         # Проверяем корректность ID картин
-        paintings = Painting.objects.filter(id__in=painting_ids)
-        if paintings.count() != len(painting_ids):
-            # Удаляем заказ, чтобы не оставлять «пустой» заказ
+        paintings_qs = Painting.objects.filter(id__in=painting_ids)
+        if paintings_qs.count() != len(painting_ids):
             order.delete()
             raise serializers.ValidationError({'painting_ids': 'Некоторые переданные ID картин некорректны.'})
 
         # Создаём OrderItem-ы
         try:
-            for painting in paintings:
+            for painting in paintings_qs:
                 OrderItem.objects.create(
                     order=order,
                     painting=painting,
@@ -155,12 +177,10 @@ class OrderSerializer(serializers.ModelSerializer):
 
         return order
 
-    def update(self, instance, validated_data):
+    def update(self, instance: Order, validated_data: Dict[str, Any]) -> Order:
         """
-        При обновлении заказа через этот эндпоинт:
-        - user менять нельзя (read_only_fields его исключили)
-        - items нельзя менять здесь (через отдельные API или логику)
-        Остальные поля (адрес, статус и т.п.) можно изменять согласно логике.
+        Обновление Order: запрещаем менять painting_ids (уже удалено из incoming), user и items.
+        Остальные поля (адрес, статус) обновляются дефолтно.
         """
         validated_data.pop('painting_ids', None)
         return super().update(instance, validated_data)
